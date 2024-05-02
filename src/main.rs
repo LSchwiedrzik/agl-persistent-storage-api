@@ -23,3 +23,15 @@ fn main() {
     let _ = DB::destroy(&Options::default(), path);
     println!("Hello, world!");
 }
+
+#[cfg(test)]
+// Unit tests go here
+mod tests {
+    use super::*;
+
+    #[test]
+    fn it_works() {
+        let result = 2 + 2;
+        assert_eq!(result, 4);
+    }
+}
