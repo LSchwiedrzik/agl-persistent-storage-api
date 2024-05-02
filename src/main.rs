@@ -26,8 +26,7 @@ fn main() {
 
 #[cfg(test)]
 // Unit tests go here
-mod tests {
-    use super::*;
+mod tests {    
 
     #[test]
     fn it_works() {
