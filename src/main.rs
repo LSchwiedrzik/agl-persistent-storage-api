@@ -24,6 +24,14 @@ fn main() {
     println!("Hello, world!");
 }
 
+fn put() {
+    println!("Put data into database");
+}
+
+fn get() {
+    println!("Get data from database");
+}
+
 #[cfg(test)]
 // Unit tests go here
 mod tests {    
