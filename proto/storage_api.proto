@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package storage_api;
+
+service Database {
+    // Sets up the data base
+    rpc SetupDB(SetupArguments) returns (StandardResponse);
+
+    // Deletes the data base
+    rpc DestroyDB(DestroyArguments) returns (StandardResponse);
+
+    // Writes a key-value pair to the data base
+    rpc Write(KeyValue) returns (StandardResponse);
+
+    // Reads a value from the data base, if the given key exists, otherwise, the ReadResponse will have "success = false"
+    rpc Read(Key) returns (ReadResponse);
+
+    // Deletes the entry for the given key from the data base
+    rpc Delete(Key) returns (StandardResponse);
+}
+
+message Key {
+    string key = 1;
+}
+
+message Value {
+    string value = 1;
+}
+
+message KeyValue {
+    string key = 1;
+    string value = 2;
+}
+
+message StandardResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+message ReadResponse {
+    bool success = 1;
+    string message = 2;
+    Value result = 3;
+}
+
+message SetupArguments {}
+
+message DestroyArguments {}
