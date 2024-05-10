@@ -61,7 +61,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
    Ok(())
 }
 
-<<<<<<< Updated upstream
 fn put() {
     println!("Put data into database");
 }
@@ -78,21 +77,5 @@ mod tests {
     fn it_works() {
         let result = 2 + 2;
         assert_eq!(result, 4);
-=======
-
-
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn funktioniert_doch_sowieso() {
-        let result = true;
-        assert_eq!(result, true);
-    }
-
-    #[test]
-    fn oder_doch_nicht() {
-        let result = false;
-        assert_eq!(result, true);
->>>>>>> Stashed changes
     }
 }
