@@ -62,6 +62,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 fn put() {
     println!("Put data into database");
 }
@@ -70,6 +71,8 @@ fn get() {
     println!("Get data from database");
 }
 
+=======
+>>>>>>> Stashed changes
 #[cfg(test)]
 // Unit tests go here
 mod tests {    

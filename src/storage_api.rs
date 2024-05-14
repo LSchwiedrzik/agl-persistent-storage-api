@@ -20,6 +20,15 @@ pub struct KeyValue {
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
+pub struct OpenArguments {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct CloseArguments {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct DestroyArguments {}
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
 pub struct StandardResponse {
     #[prost(bool, tag = "1")]
     pub success: bool,
@@ -36,12 +45,6 @@ pub struct ReadResponse {
     #[prost(message, optional, tag = "3")]
     pub result: ::core::option::Option<Value>,
 }
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct SetupArguments {}
-#[allow(clippy::derive_partial_eq_without_eq)]
-#[derive(Clone, PartialEq, ::prost::Message)]
-pub struct DestroyArguments {}
 /// Generated client implementations.
 pub mod database_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
@@ -111,10 +114,10 @@ pub mod database_client {
             self.inner = self.inner.accept_compressed(encoding);
             self
         }
-        /// Sets up the data base
-        pub async fn setup_db(
+        /// Opens the data base and creates it, if it doesn't exist yet
+        pub async fn open_db(
             &mut self,
-            request: impl tonic::IntoRequest<super::SetupArguments>,
+            request: impl tonic::IntoRequest<super::OpenArguments>,
         ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status> {
             self.inner
                 .ready()
@@ -127,7 +130,27 @@ pub mod database_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/storage_api.Database/SetupDB",
+                "/storage_api.Database/OpenDB",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
+        /// Closes the data base
+        pub async fn close_db(
+            &mut self,
+            request: impl tonic::IntoRequest<super::CloseArguments>,
+        ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/storage_api.Database/CloseDB",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
@@ -220,10 +243,15 @@ pub mod database_server {
     /// Generated trait containing gRPC methods that should be implemented for use with DatabaseServer.
     #[async_trait]
     pub trait Database: Send + Sync + 'static {
-        /// Sets up the data base
-        async fn setup_db(
+        /// Opens the data base and creates it, if it doesn't exist yet
+        async fn open_db(
             &self,
-            request: tonic::Request<super::SetupArguments>,
+            request: tonic::Request<super::OpenArguments>,
+        ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status>;
+        /// Closes the data base
+        async fn close_db(
+            &self,
+            request: tonic::Request<super::CloseArguments>,
         ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status>;
         /// Deletes the data base
         async fn destroy_db(
@@ -305,11 +333,11 @@ pub mod database_server {
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
             let inner = self.inner.clone();
             match req.uri().path() {
-                "/storage_api.Database/SetupDB" => {
+                "/storage_api.Database/OpenDB" => {
                     #[allow(non_camel_case_types)]
-                    struct SetupDBSvc<T: Database>(pub Arc<T>);
-                    impl<T: Database> tonic::server::UnaryService<super::SetupArguments>
-                    for SetupDBSvc<T> {
+                    struct OpenDBSvc<T: Database>(pub Arc<T>);
+                    impl<T: Database> tonic::server::UnaryService<super::OpenArguments>
+                    for OpenDBSvc<T> {
                         type Response = super::StandardResponse;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
@@ -317,10 +345,10 @@ pub mod database_server {
                         >;
                         fn call(
                             &mut self,
-                            request: tonic::Request<super::SetupArguments>,
+                            request: tonic::Request<super::OpenArguments>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move { (*inner).setup_db(request).await };
+                            let fut = async move { (*inner).open_db(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -329,7 +357,43 @@ pub mod database_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = SetupDBSvc(inner);
+                        let method = OpenDBSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/storage_api.Database/CloseDB" => {
+                    #[allow(non_camel_case_types)]
+                    struct CloseDBSvc<T: Database>(pub Arc<T>);
+                    impl<T: Database> tonic::server::UnaryService<super::CloseArguments>
+                    for CloseDBSvc<T> {
+                        type Response = super::StandardResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::CloseArguments>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).close_db(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = CloseDBSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(

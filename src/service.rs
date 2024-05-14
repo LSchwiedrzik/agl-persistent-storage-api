@@ -1,7 +1,15 @@
 use crate::facade;
 
-pub fn setup_db(path:&str) -> bool {
+/*pub fn setup_db(path:&str) -> bool {
     facade::setup_db(path)
+}*/
+
+pub fn open_db(path:&str) -> bool {
+    facade::open_db(path)
+}
+
+pub fn close_db() -> bool {
+    facade::close_db()
 }
 
 pub fn destroy_db(path:&str) -> bool {
