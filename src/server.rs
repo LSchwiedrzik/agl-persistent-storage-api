@@ -10,7 +10,7 @@ use tonic::{Request, Response, Status};
 
 use crate::storage_api::database_server::Database;
 use crate::storage_api::{
-    Key, Value, KeyValue, StandardResponse, ReadResponse, SetupArguments, DestroyArguments, 
+    DestroyArguments, Key, KeyValue, ReadResponse, SetupArguments, StandardResponse, Value,
 };
 
 use crate::service;
@@ -18,9 +18,7 @@ use crate::service;
 //const NO_KEY_ERR: &str = "the key doesn't exist in the database";
 
 #[derive(Debug)]
-pub struct DatabaseManager {
-
-}
+pub struct DatabaseManager {}
 
 #[tonic::async_trait]
 impl Database for DatabaseManager {
@@ -62,24 +60,18 @@ impl Database for DatabaseManager {
         }))
     }
 
-    async fn read(
-        &self,
-        request: Request<Key>,
-    ) -> Result<Response<ReadResponse>, Status> {
+    async fn read(&self, request: Request<Key>) -> Result<Response<ReadResponse>, Status> {
         let key = request.into_inner();
         let res = service::read_db(&key.key);
 
         Ok(Response::new(ReadResponse {
             success: res.0,
             message: "success".into(),
-            result: Some(Value{value: res.1}),
+            result: Some(Value { value: res.1 }),
         }))
     }
 
-    async fn delete(
-        &self,
-        request: Request<Key>,
-    ) -> Result<Response<StandardResponse>, Status> {
+    async fn delete(&self, request: Request<Key>) -> Result<Response<StandardResponse>, Status> {
         let key = request.into_inner();
         let res: bool = service::delete_db(&key.key);
 
