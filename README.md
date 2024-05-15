@@ -30,7 +30,19 @@ architecture:
    [here](https://github.com/protocolbuffers/protobuf/releases)) and set the
    `PROTOC` environment variable:
    `echo -n "export PROTOC=/path/to/protoc.exe" >> ~/.bashrc`
-3. Build the application
+3. Build application
+
+   ```bash
+   cargo build
+   ```
+
+4. Run tests
+
+   ```bash
+   cargo test
+   ```
+
+5. Start server
 
    ```bash
    cargo run --release --bin server
