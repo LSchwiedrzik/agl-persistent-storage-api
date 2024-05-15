@@ -53,14 +53,20 @@ architecture:
 Insomnia wie in https://konghq.com/blog/engineering/building-grpc-apis-with-rust
 beschrieben
 
-```text
-SetupDB: {}
+OpenDB:
+{}
 
 Write: { "key": "testkey", "value": "testvalue" }
 
 Read: { "key": "testkey" }
 
-Read: { "key": "wrongkey" }
+Read:
+{
+    "key": "wrongkey"
+}
+
+CloseDB:
+{}
 
 DestroyDB: {}
 ```

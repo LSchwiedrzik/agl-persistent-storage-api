@@ -1,0 +1,109 @@
+2024/05/15-14:13:04.563709 b154 RocksDB version: 8.10.0
+2024/05/15-14:13:04.563883 b154 Compile date 2023-12-15 13:01:14
+2024/05/15-14:13:04.563974 b154 DB SUMMARY
+2024/05/15-14:13:04.564029 b154 Host name (Env):  P14SNB092
+2024/05/15-14:13:04.564063 b154 DB Session ID:  3LS8V7AJIYIETJFTFVMH
+2024/05/15-14:13:04.565773 b154 CURRENT file:  CURRENT
+2024/05/15-14:13:04.565912 b154 IDENTITY file:  IDENTITY
+2024/05/15-14:13:04.566296 b154 MANIFEST file:  MANIFEST-000005 size: 70 Bytes
+2024/05/15-14:13:04.566378 b154 SST files in testpath dir, Total Num: 0, files: 
+2024/05/15-14:13:04.566422 b154 Write Ahead Log file in testpath: 000004.log size: 0 ; 
+2024/05/15-14:13:04.566459 b154                         Options.error_if_exists: 0
+2024/05/15-14:13:04.566494 b154                       Options.create_if_missing: 1
+2024/05/15-14:13:04.576235 b154                         Options.paranoid_checks: 1
+2024/05/15-14:13:04.576268 b154             Options.flush_verify_memtable_count: 1
+2024/05/15-14:13:04.576280 b154          Options.compaction_verify_record_count: 1
+2024/05/15-14:13:04.576289 b154                               Options.track_and_verify_wals_in_manifest: 0
+2024/05/15-14:13:04.576299 b154        Options.verify_sst_unique_id_in_manifest: 1
+2024/05/15-14:13:04.576308 b154                                     Options.env: 000001A6CB8D5810
+2024/05/15-14:13:04.576319 b154                                      Options.fs: WinFS
+2024/05/15-14:13:04.576329 b154                                Options.info_log: 000001A6CBB3D2F0
+2024/05/15-14:13:04.576339 b154                Options.max_file_opening_threads: 16
+2024/05/15-14:13:04.576348 b154                              Options.statistics: 0000000000000000
+2024/05/15-14:13:04.576357 b154                               Options.use_fsync: 0
+2024/05/15-14:13:04.576366 b154                       Options.max_log_file_size: 0
+2024/05/15-14:13:04.576376 b154                  Options.max_manifest_file_size: 1073741824
+2024/05/15-14:13:04.576385 b154                   Options.log_file_time_to_roll: 0
+2024/05/15-14:13:04.576394 b154                       Options.keep_log_file_num: 1000
+2024/05/15-14:13:04.576403 b154                    Options.recycle_log_file_num: 0
+2024/05/15-14:13:04.576412 b154                         Options.allow_fallocate: 1
+2024/05/15-14:13:04.576421 b154                        Options.allow_mmap_reads: 0
+2024/05/15-14:13:04.576430 b154                       Options.allow_mmap_writes: 0
+2024/05/15-14:13:04.576439 b154                        Options.use_direct_reads: 0
+2024/05/15-14:13:04.576447 b154                        Options.use_direct_io_for_flush_and_compaction: 0
+2024/05/15-14:13:04.576456 b154          Options.create_missing_column_families: 0
+2024/05/15-14:13:04.576465 b154                              Options.db_log_dir: 
+2024/05/15-14:13:04.576474 b154                                 Options.wal_dir: 
+2024/05/15-14:13:04.576483 b154                Options.table_cache_numshardbits: 6
+2024/05/15-14:13:04.576492 b154                         Options.WAL_ttl_seconds: 0
+2024/05/15-14:13:04.576500 b154                       Options.WAL_size_limit_MB: 0
+2024/05/15-14:13:04.576509 b154                        Options.max_write_batch_group_size_bytes: 1048576
+2024/05/15-14:13:04.576518 b154             Options.manifest_preallocation_size: 4194304
+2024/05/15-14:13:04.576527 b154                     Options.is_fd_close_on_exec: 1
+2024/05/15-14:13:04.576536 b154                   Options.advise_random_on_open: 1
+2024/05/15-14:13:04.576545 b154                    Options.db_write_buffer_size: 0
+2024/05/15-14:13:04.576554 b154                    Options.write_buffer_manager: 000001A6CBB89620
+2024/05/15-14:13:04.576563 b154         Options.access_hint_on_compaction_start: 1
+2024/05/15-14:13:04.576571 b154           Options.random_access_max_buffer_size: 1048576
+2024/05/15-14:13:04.576580 b154                      Options.use_adaptive_mutex: 0
+2024/05/15-14:13:04.576589 b154                            Options.rate_limiter: 0000000000000000
+2024/05/15-14:13:04.576599 b154     Options.sst_file_manager.rate_bytes_per_sec: 0
+2024/05/15-14:13:04.576705 b154                       Options.wal_recovery_mode: 2
+2024/05/15-14:13:04.576724 b154                  Options.enable_thread_tracking: 0
+2024/05/15-14:13:04.576735 b154                  Options.enable_pipelined_write: 0
+2024/05/15-14:13:04.576744 b154                  Options.unordered_write: 0
+2024/05/15-14:13:04.576753 b154         Options.allow_concurrent_memtable_write: 1
+2024/05/15-14:13:04.576762 b154      Options.enable_write_thread_adaptive_yield: 1
+2024/05/15-14:13:04.576771 b154             Options.write_thread_max_yield_usec: 100
+2024/05/15-14:13:04.576780 b154            Options.write_thread_slow_yield_usec: 3
+2024/05/15-14:13:04.576789 b154                               Options.row_cache: None
+2024/05/15-14:13:04.576798 b154                              Options.wal_filter: None
+2024/05/15-14:13:04.576807 b154             Options.avoid_flush_during_recovery: 0
+2024/05/15-14:13:04.576816 b154             Options.allow_ingest_behind: 0
+2024/05/15-14:13:04.576825 b154             Options.two_write_queues: 0
+2024/05/15-14:13:04.576834 b154             Options.manual_wal_flush: 0
+2024/05/15-14:13:04.576843 b154             Options.wal_compression: 0
+2024/05/15-14:13:04.576851 b154             Options.atomic_flush: 0
+2024/05/15-14:13:04.576860 b154             Options.avoid_unnecessary_blocking_io: 0
+2024/05/15-14:13:04.576869 b154                 Options.persist_stats_to_disk: 0
+2024/05/15-14:13:04.576878 b154                 Options.write_dbid_to_manifest: 0
+2024/05/15-14:13:04.576886 b154                 Options.log_readahead_size: 0
+2024/05/15-14:13:04.576895 b154                 Options.file_checksum_gen_factory: Unknown
+2024/05/15-14:13:04.576904 b154                 Options.best_efforts_recovery: 0
+2024/05/15-14:13:04.576913 b154                Options.max_bgerror_resume_count: 2147483647
+2024/05/15-14:13:04.576922 b154            Options.bgerror_resume_retry_interval: 1000000
+2024/05/15-14:13:04.576931 b154             Options.allow_data_in_errors: 0
+2024/05/15-14:13:04.576940 b154             Options.db_host_id: __hostname__
+2024/05/15-14:13:04.576949 b154             Options.enforce_single_del_contracts: true
+2024/05/15-14:13:04.576958 b154             Options.max_background_jobs: 2
+2024/05/15-14:13:04.576967 b154             Options.max_background_compactions: -1
+2024/05/15-14:13:04.576976 b154             Options.max_subcompactions: 1
+2024/05/15-14:13:04.576985 b154             Options.avoid_flush_during_shutdown: 0
+2024/05/15-14:13:04.576994 b154           Options.writable_file_max_buffer_size: 1048576
+2024/05/15-14:13:04.577003 b154             Options.delayed_write_rate : 16777216
+2024/05/15-14:13:04.577012 b154             Options.max_total_wal_size: 0
+2024/05/15-14:13:04.577025 b154             Options.delete_obsolete_files_period_micros: 21600000000
+2024/05/15-14:13:04.577034 b154                   Options.stats_dump_period_sec: 600
+2024/05/15-14:13:04.577043 b154                 Options.stats_persist_period_sec: 600
+2024/05/15-14:13:04.577052 b154                 Options.stats_history_buffer_size: 1048576
+2024/05/15-14:13:04.577061 b154                          Options.max_open_files: -1
+2024/05/15-14:13:04.577070 b154                          Options.bytes_per_sync: 0
+2024/05/15-14:13:04.577079 b154                      Options.wal_bytes_per_sync: 0
+2024/05/15-14:13:04.577088 b154                   Options.strict_bytes_per_sync: 0
+2024/05/15-14:13:04.577097 b154       Options.compaction_readahead_size: 2097152
+2024/05/15-14:13:04.577105 b154                  Options.max_background_flushes: -1
+2024/05/15-14:13:04.577114 b154 Options.daily_offpeak_time_utc: 
+2024/05/15-14:13:04.577123 b154 Compression algorithms supported:
+2024/05/15-14:13:04.577134 b154 	kZSTD supported: 1
+2024/05/15-14:13:04.577144 b154 	kSnappyCompression supported: 1
+2024/05/15-14:13:04.577153 b154 	kBZip2Compression supported: 1
+2024/05/15-14:13:04.577163 b154 	kZlibCompression supported: 1
+2024/05/15-14:13:04.577173 b154 	kLZ4Compression supported: 1
+2024/05/15-14:13:04.577266 b154 	kXpressCompression supported: 0
+2024/05/15-14:13:04.577335 b154 	kLZ4HCCompression supported: 1
+2024/05/15-14:13:04.577357 b154 	kZSTDNotFinalCompression supported: 1
+2024/05/15-14:13:04.577373 b154 Fast CRC32 supported: Not supported on x86
+2024/05/15-14:13:04.577384 b154 DMutex implementation: std::mutex
+2024/05/15-14:13:04.580203 b154 [WARN] [db/db_impl/db_impl_open.cc:2255] DB::Open() failed: IO error: Failed to create lock file: testpath/LOCK: The process cannot access the file because it is being used by another process.
+2024/05/15-14:13:04.580272 b154 [db/db_impl/db_impl.cc:486] Shutdown: canceling all background work
+2024/05/15-14:13:04.580346 b154 [db/db_impl/db_impl.cc:667] Shutdown complete

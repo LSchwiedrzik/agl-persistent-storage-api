@@ -4,7 +4,13 @@ package storage_api;
 
 service Database {
     // Sets up the data base
-    rpc SetupDB(SetupArguments) returns (StandardResponse);
+    // rpc SetupDB(SetupArguments) returns (StandardResponse);
+
+    // Opens the data base and creates it, if it doesn't exist yet
+    rpc OpenDB(OpenArguments) returns (StandardResponse);
+
+    // Closes the data base
+    rpc CloseDB(CloseArguments) returns (StandardResponse);
 
     // Deletes the data base
     rpc DestroyDB(DestroyArguments) returns (StandardResponse);
@@ -32,6 +38,16 @@ message KeyValue {
     string value = 2;
 }
 
+// message Path {
+//     string path = 1;
+// }
+
+message OpenArguments {}
+
+message CloseArguments {}
+
+message DestroyArguments {}
+
 message StandardResponse {
     bool success = 1;
     string message = 2;
@@ -40,9 +56,5 @@ message StandardResponse {
 message ReadResponse {
     bool success = 1;
     string message = 2;
-    Value result = 3;
+    string result = 3;
 }
-
-message SetupArguments {}
-
-message DestroyArguments {}
