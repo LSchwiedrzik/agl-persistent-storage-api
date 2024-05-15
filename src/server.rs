@@ -11,7 +11,7 @@ use tonic::{Request, Response, Status};
 use crate::storage_api::database_server::Database;
 //use crate::storage_api::database_client::DatabaseClient;
 use crate::storage_api::{
-    Key, Value, KeyValue, StandardResponse, ReadResponse, OpenArguments, CloseArguments, DestroyArguments, 
+    Key, KeyValue, StandardResponse, ReadResponse, OpenArguments, CloseArguments, DestroyArguments, 
 };
 
 use crate::service;
@@ -42,11 +42,11 @@ impl Database for DatabaseManager {
         &self,
         _request: Request<OpenArguments>,
     ) -> Result<Response<StandardResponse>, Status> {
-        let res: bool = service::open_db("testpath".into());
+        let res: (bool, String) = service::open_db();
 
         Ok(Response::new(StandardResponse {
-            success: res,
-            message: "success".into(),
+            success: res.0,
+            message: res.1,
         }))
     }
 
@@ -54,11 +54,11 @@ impl Database for DatabaseManager {
         &self,
         _request: Request<CloseArguments>,
     ) -> Result<Response<StandardResponse>, Status> {
-        let res: bool = service::close_db();
+        let res: (bool, String) = service::close_db();
 
         Ok(Response::new(StandardResponse {
-            success: res,
-            message: "success".into(),
+            success: res.0,
+            message: res.1,
         }))
     }
 
@@ -66,11 +66,11 @@ impl Database for DatabaseManager {
         &self,
         _request: Request<DestroyArguments>,
     ) -> Result<Response<StandardResponse>, Status> {
-        let res: bool = service::destroy_db("testpath".into());
+        let res: (bool, String) = service::destroy_db();
 
         Ok(Response::new(StandardResponse {
-            success: res,
-            message: "success".into(),
+            success: res.0,
+            message: res.1,
         }))
     }
 
@@ -79,11 +79,11 @@ impl Database for DatabaseManager {
         request: Request<KeyValue>,
     ) -> Result<Response<StandardResponse>, Status> {
         let keyvalue = request.into_inner();
-        let res: bool = service::write_db(&keyvalue.key, &keyvalue.value);
+        let res: (bool, String) = service::write_db(&keyvalue.key, &keyvalue.value);
 
         Ok(Response::new(StandardResponse {
-            success: res,
-            message: "success".into(),
+            success: res.0,
+            message: res.1,
         }))
     }
 
@@ -91,13 +91,13 @@ impl Database for DatabaseManager {
         &self,
         request: Request<Key>,
     ) -> Result<Response<ReadResponse>, Status> {
-        let key = request.into_inner();
-        let res = service::read_db(&key.key);
+        let key: Key = request.into_inner();
+        let res: (bool, String, String) = service::read_db(&key.key);
 
         Ok(Response::new(ReadResponse {
             success: res.0,
-            message: "success".into(),
-            result: Some(Value{value: res.1}),
+            message: res.1,
+            result: res.2,
         }))
     }
 
@@ -106,11 +106,11 @@ impl Database for DatabaseManager {
         request: Request<Key>,
     ) -> Result<Response<StandardResponse>, Status> {
         let key = request.into_inner();
-        let res: bool = service::delete_db(&key.key);
+        let res: (bool, String) = service::delete_db(&key.key);
 
         Ok(Response::new(StandardResponse {
-            success: res,
-            message: "success".into(),
+            success: res.0,
+            message: res.1,
         }))
     }
 }

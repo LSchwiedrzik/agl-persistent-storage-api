@@ -56,5 +56,5 @@ message StandardResponse {
 message ReadResponse {
     bool success = 1;
     string message = 2;
-    Value result = 3;
+    string result = 3;
 }

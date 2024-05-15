@@ -5,7 +5,7 @@ cargo run --release --bin server
 
 Insomnia wie in https://konghq.com/blog/engineering/building-grpc-apis-with-rust beschrieben
 
-SetupDB:
+OpenDB:
 {}
 
 Write:
@@ -23,6 +23,9 @@ Read:
 {
     "key": "wrongkey"
 }
+
+CloseDB:
+{}
 
 DestroyDB:
 {}

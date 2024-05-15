@@ -42,8 +42,8 @@ pub struct ReadResponse {
     pub success: bool,
     #[prost(string, tag = "2")]
     pub message: ::prost::alloc::string::String,
-    #[prost(message, optional, tag = "3")]
-    pub result: ::core::option::Option<Value>,
+    #[prost(string, tag = "3")]
+    pub result: ::prost::alloc::string::String,
 }
 /// Generated client implementations.
 pub mod database_client {
