@@ -28,58 +28,58 @@ architecture:
 - read(key: string) -> StandardResponse(success: boolean, message: string)
   - Consumer wants value of existing key, e.g. 'Vehicle.Infotainment.Radio.CurrentStation':
   
-		read('Vehicle.Infotainment.Radio.CurrentStation') -> 'wdr 4'
-      read('Vehicle.bla') -> ERROR
+        read('Vehicle.Infotainment.Radio.CurrentStation') -> 'wdr 4'
+        read('Vehicle.doesNotExist') -> ERROR
 
 - delete(key: string) -> StandardResponse(success: boolean, message: string)
   - Customer wants to delete an existing key+value, e.g. 'Vehicle.Infotainment.Radio.CurrentStation':
 
-      delete('Vehicle.Infotainment.Radio.CurrentStation') -> Response
-      delete('Vehicle.bla') -> ERROR
+        delete('Vehicle.Infotainment.Radio.CurrentStation') -> Response
+        delete('Vehicle.doesNotExist') -> ERROR
 
 - write(key: string, value: string) -> ReadResponse(success: boolean, message: string, value: string)
-  - Consumer wants to save key+value, e.g. 'Vehicle.Infotainment.Radio.CurrentStation':'hr5'
-    This overwrites existing value under key.
+  - Consumer wants to save key+value (e.g. 'Vehicle.Infotainment.Radio.CurrentStation':'hr5').
+  - This overwrites existing value under key.
   
-		write('Vehicle.Infotainment.Radio.CurrentStation':'1live') -> Response
-      write('Vehicle.Infotainment':'yes') -> Response
-      write('test':'1') -> Response
+        write('Vehicle.Infotainment.Radio.CurrentStation':'1live') -> Response
+        write('Vehicle.Infotainment':'yes') -> Response
+        write('test':'1') -> Response
 
 - list_keys_containing(string) -> ListResponse(success: boolean, message: string, keys: repeated string)
   - Consumer wants to see all keys that contain string, e.g. 'Radio'
 
-      list_keys_containing('Radio') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
-      list_keys_containing('Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
-      list_keys_containing('nt.Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation')
-      list_keys_containing('') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume') 'Vehicle.Infotainment'
+        list_keys_containing('Radio') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
+        list_keys_containing('Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
+        list_keys_containing('nt.Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation')
+        list_keys_containing('') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume') 'Vehicle.Infotainment'
 
 - list_nodes_starting_in(node: string, level: optional int) -> ListResponse(boolean, message, repeated string keys)
-  - Consumer wants to see all nodes that start in <string> exactly <int> layers deep, e.g. 'Vehicle.Infotainment'
-    <int> = -1 lists all keys that start in <string> any number of layers deep
-    <int> = default value is 1
-    <string> = '' returns root node
+  - Consumer wants to see all nodes that start in $string exactly $int layers deep, e.g. 'Vehicle.Infotainment'
+  - $int = -1 lists all keys that start in $string any number of layers deep
+  - $int = default value is 1
+  - $string = '' returns root node
 
-      list_nodes_starting_in('Vehicle.Infotainment', 1) -> ('Vehicle.Infotainment.Radio', 'Vehicle.Infotainment.HVAC')
-      list_nodes_starting_in('Vehicle.Infotainment', 2) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
-      list_nodes_starting_in('Vehicle', -1) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume', 'Vehicle.Infotainment')
-      list_nodes_starting_in('Vehicle.Infotainment', -1) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Infotainment')
-      list_nodes_starting_in('Vehicle.Infotainment', 0) -> ('Vehicle.Infotainment')
-      list_nodes_starting_in('Vehicle.Infotainment') -> ('Vehicle.Infotainment.Radio', 'Vehicle.Infotainment.HVAC')
-      list_nodes_starting_in('') -> ('Vehicle', 'test')
-      list_nodes_starting_in('', 1) -> ('Vehicle', 'test')
+        list_nodes_starting_in('Vehicle.Infotainment', 1) -> ('Vehicle.Infotainment.Radio', 'Vehicle.Infotainment.HVAC')
+        list_nodes_starting_in('Vehicle.Infotainment', 2) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
+        list_nodes_starting_in('Vehicle', -1) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume', 'Vehicle.Infotainment')
+        list_nodes_starting_in('Vehicle.Infotainment', -1) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Infotainment')
+        list_nodes_starting_in('Vehicle.Infotainment', 0) -> ('Vehicle.Infotainment')
+        list_nodes_starting_in('Vehicle.Infotainment') -> ('Vehicle.Infotainment.Radio', 'Vehicle.Infotainment.HVAC')
+        list_nodes_starting_in('') -> ('Vehicle', 'test')
+        list_nodes_starting_in('', 1) -> ('Vehicle', 'test')
 
 - delete_recursively_from(node: string) -> StandardResponse
-  - Consumer wants to delete all keys that start in <string>, e.g. 'Vehicle.Infotainment'
-    <string> = '' returns ERROR
+  - Consumer wants to delete all keys that start in $string, e.g. 'Vehicle.Infotainment'
+  - $string = '' returns ERROR
 
-      delete_recursively_from('Vehicle.Infotainment') -> // deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
-      delete_recursively_from('Vehicle') -> //deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
-      delete_recursively_from('') -> ERROR
+        delete_recursively_from('Vehicle.Infotainment') -> // deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
+        delete_recursively_from('Vehicle') -> //deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
+        delete_recursively_from('') -> ERROR
 
 ## Example Tree
 Note: nodes marked by * are keys (and therefore have a value)
 
-Vehicle
+- Vehicle
   - Infotainment *
     - Radio
       - CurrentStation *
@@ -89,7 +89,7 @@ Vehicle
   - Communication
     - Radio
       - Volume *
-test *
+- test *
 
 ## Setup instructions (WIP)
 
