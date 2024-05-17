@@ -1,70 +1,33 @@
-//use futures::Stream;
-//use std::borrow::BorrowMut;
-//use std::collections::HashMap;
-//use std::pin::Pin;
-//use std::sync::Arc;
-//use tokio::sync::{mpsc, Mutex};
-//use tokio_stream::wrappers::UnboundedReceiverStream;
 use tonic::{Request, Response, Status};
-//use rocksdb::{Options, DB};
+use std::sync::Arc;
+use tokio::sync::Mutex;
 
 use crate::storage_api::database_server::Database;
-//use crate::storage_api::database_client::DatabaseClient;
 use crate::storage_api::{
-    Key, KeyValue, StandardResponse, ReadResponse, OpenArguments, CloseArguments, DestroyArguments, 
+    Key, KeyValue, StandardResponse, ReadResponse, DestroyArguments, 
 };
 
-use crate::service;
-
-//const NO_KEY_ERR: &str = "the key doesn't exist in the database";
+use crate::service::DbService;
 
 #[derive(Debug)]
-pub struct DatabaseManager {}
+pub struct DatabaseManager {
+    db_service: Arc<Mutex<DbService>>,
+}
+
+impl DatabaseManager {
+    pub fn new() -> DatabaseManager {
+        DatabaseManager { db_service: Arc::new(Mutex::new(DbService::new())) }
+    }
+}
 
 #[tonic::async_trait]
 impl Database for DatabaseManager {
-    //open_db, close_db, destroy_db, write, read, delete
-    /*async fn setup_db(
-        &self,
-        _request: Request<SetupArguments>,
-    ) -> Result<Response<StandardResponse>, Status> {
-        let res: bool = service::setup_db("testpath".into());
-
-        Ok(Response::new(StandardResponse {
-            success: res,
-            message: "success".into(),
-        }))
-    }*/
-
-    async fn open_db(
-        &self,
-        _request: Request<OpenArguments>,
-    ) -> Result<Response<StandardResponse>, Status> {
-        let res: (bool, String) = service::open_db();
-
-        Ok(Response::new(StandardResponse {
-            success: res.0,
-            message: res.1,
-        }))
-    }
-
-    async fn close_db(
-        &self,
-        _request: Request<CloseArguments>,
-    ) -> Result<Response<StandardResponse>, Status> {
-        let res: (bool, String) = service::close_db();
-
-        Ok(Response::new(StandardResponse {
-            success: res.0,
-            message: res.1,
-        }))
-    }
 
     async fn destroy_db(
         &self,
         _request: Request<DestroyArguments>,
     ) -> Result<Response<StandardResponse>, Status> {
-        let res: (bool, String) = service::destroy_db();
+        let res: (bool, String) = self.db_service.lock().await.destroy_db();
 
         Ok(Response::new(StandardResponse {
             success: res.0,
@@ -77,7 +40,7 @@ impl Database for DatabaseManager {
         request: Request<KeyValue>,
     ) -> Result<Response<StandardResponse>, Status> {
         let keyvalue = request.into_inner();
-        let res: (bool, String) = service::write_db(&keyvalue.key, &keyvalue.value);
+        let res: (bool, String) = self.db_service.lock().await.write_db(&keyvalue.key, &keyvalue.value);
 
         Ok(Response::new(StandardResponse {
             success: res.0,
@@ -90,7 +53,7 @@ impl Database for DatabaseManager {
         request: Request<Key>,
     ) -> Result<Response<ReadResponse>, Status> {
         let key: Key = request.into_inner();
-        let res: (bool, String, String) = service::read_db(&key.key);
+        let res: (bool, String, String) = self.db_service.lock().await.read_db(&key.key);
 
         Ok(Response::new(ReadResponse {
             success: res.0,
@@ -101,7 +64,7 @@ impl Database for DatabaseManager {
 
     async fn delete(&self, request: Request<Key>) -> Result<Response<StandardResponse>, Status> {
         let key = request.into_inner();
-        let res: (bool, String) = service::delete_db(&key.key);
+        let res: (bool, String) = self.db_service.lock().await.delete_db(&key.key);
 
         Ok(Response::new(StandardResponse {
             success: res.0,
@@ -111,37 +74,131 @@ impl Database for DatabaseManager {
 }
 
 
-
-/*#[cfg(test)]
-// Unit tests go here
+#[cfg(test)]
 mod tests {
-    use crate::storage_api::OpenArguments;
-    
+    use super::*;
+    use tonic::transport::Server;
+    use std::net::SocketAddr;
+    use crate::storage_api::database_server::DatabaseServer;
+    use crate::storage_api::database_client::DatabaseClient;
 
-    #[test]
-    fn it_works() {
-        let mut client = DatabaseClient::connect("http://127.0.0.1:9001").await?;
 
-        let oa = OpenArguments { };
+    // TEST FOR WRITE FUNCTION
 
-        let request1 = tonic::Request::new(oa);
-        let response1 = client.open_db(request1).await?;
+    #[tokio::test]
+    async fn test_write_key_value() {
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+        
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
 
-        let kv = KeyValue {
-            key: String::from("testkey".into),
-            value: String::from("testvalue".into),
-        };
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
-        let request2 = tonic::Request::new(kv);
-        let response2 = client.write(request2).await?;
+        let key = "Vehicle.Infotainment.Radio.CurrentStation";
+        let value = "1live";
+        let key_value = KeyValue { key: key.to_string(), value: value.to_string() };
 
-        let ky = Key {
-            key: String::from("testkey".into),
-        };
+        // Act
+        let response = client.write(key_value).await.unwrap();
+        let read_value = client.read(Key { key: key.to_string() }).await.unwrap();
 
-        let request3 = tonic::Request::new(ky);
-        let response3 = client.read(request3).await?;
+        // Assert
+        assert!(response.into_inner().success && read_value.into_inner().result == value);
 
-        assert_eq!(response.into_inner().result.value, "testvalue");
+        // Clean up.
+        server_task.abort();
     }
-}*/
+
+    #[tokio::test]
+    async fn test_write_two_keys_on_root_level() {
+        // Tests if it is possible to write to a "node" of a before hand written key, regarding VSS
+
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+        
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        let key1 = "Vehicle";
+        let value1 = "car";
+        let key_value1 = KeyValue { key: key1.to_string(), value: value1.to_string() };
+
+        let key2 = "test";
+        let value2 = "test";
+        let key_value2 = KeyValue { key: key2.to_string(), value: value2.to_string() };
+
+        // Act
+        let response1 = client.write(key_value1).await.unwrap();
+        let response2 = client.write(key_value2).await.unwrap();
+
+        let read_value1 = client.read(Key { key: key1.to_string() }).await.unwrap();
+        let read_value2 = client.read(Key { key: key2.to_string() }).await.unwrap();
+
+        // Assert
+        assert!(read_value1.into_inner().result == value1 
+                    && read_value2.into_inner().result == value2 
+                    && response1.into_inner().success 
+                    && response2.into_inner().success);
+
+        // Clean up.
+        server_task.abort();
+    }
+    
+    #[tokio::test]
+    async fn test_write_to_node() {
+        // Tests if it is possible to write to a "node" of a before hand written key, regarding VSS
+
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+        
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        let key1 = "Vehicle.Infotainment.Radio.CurrentStation";
+        let value1 = "1live";
+        let key_value1 = KeyValue { key: key1.to_string(), value: value1.to_string() };
+
+        let key2 = "Vehicle.Infotainment";
+        let value2 = "exists";
+        let key_value2 = KeyValue { key: key2.to_string(), value: value2.to_string() };
+
+        // Act
+        let response1 = client.write(key_value1).await.unwrap();
+        let response2 = client.write(key_value2).await.unwrap();
+
+        let read_value1 = client.read(Key { key: key1.to_string() }).await.unwrap();
+        let read_value2 = client.read(Key { key: key2.to_string() }).await.unwrap();
+
+        // Assert
+        assert!(read_value1.into_inner().result == value1 
+                    && read_value2.into_inner().result == value2
+                    && response1.into_inner().success 
+                    && response2.into_inner().success);
+
+        // Clean up.
+        server_task.abort();
+    }
+
+    // TESTS FOR 
+
+}

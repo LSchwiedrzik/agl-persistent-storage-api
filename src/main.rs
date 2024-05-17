@@ -18,8 +18,7 @@ mod storage_api_proto {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "127.0.0.1:9001".parse()?;
-    //let dbmanager = DatabaseManager::default();
-    let dbmanager = DatabaseManager {};
+    let dbmanager = DatabaseManager::new();
 
     let reflection_service = tonic_reflection::server::Builder::configure()
         .register_encoded_file_descriptor_set(storage_api_proto::FILE_DESCRIPTOR_SET)
