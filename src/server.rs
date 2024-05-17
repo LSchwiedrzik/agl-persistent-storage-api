@@ -76,6 +76,7 @@ impl Database for DatabaseManager {
 
 #[cfg(test)]
 mod tests {
+    use serial_test::serial;
     use super::*;
     use tonic::transport::Server;
     use std::net::SocketAddr;
@@ -86,6 +87,7 @@ mod tests {
     // TEST FOR WRITE FUNCTION
 
     #[tokio::test]
+    #[serial]
     async fn test_write_key_value() {
         // Arrange
         let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
@@ -94,7 +96,7 @@ mod tests {
         let server_task = tokio::spawn(server.serve(address.clone()));
         
         // Wait for the server to be ready.
-        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
         let end_addr = "http://127.0.0.1:9001";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
@@ -112,10 +114,12 @@ mod tests {
         assert!(response.into_inner().success && read_value.into_inner().result == value);
 
         // Clean up.
+        let _response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
         server_task.abort();
     }
 
     #[tokio::test]
+    #[serial]
     async fn test_write_two_keys_on_root_level() {
         // Tests if it is possible to write to a "node" of a before hand written key, regarding VSS
 
@@ -126,7 +130,7 @@ mod tests {
         let server_task = tokio::spawn(server.serve(address.clone()));
         
         // Wait for the server to be ready.
-        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
         let end_addr = "http://127.0.0.1:9001";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
@@ -154,10 +158,12 @@ mod tests {
                     && response2.into_inner().success);
 
         // Clean up.
+        let _response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
         server_task.abort();
     }
     
     #[tokio::test]
+    #[serial]
     async fn test_write_to_node() {
         // Tests if it is possible to write to a "node" of a before hand written key, regarding VSS
 
@@ -168,7 +174,7 @@ mod tests {
         let server_task = tokio::spawn(server.serve(address.clone()));
         
         // Wait for the server to be ready.
-        tokio::time::sleep(tokio::time::Duration::from_secs(1)).await;
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
         let end_addr = "http://127.0.0.1:9001";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
@@ -196,9 +202,77 @@ mod tests {
                     && response2.into_inner().success);
 
         // Clean up.
+        let _response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
         server_task.abort();
     }
 
-    // TESTS FOR 
+    // TESTS FOR DELETE FUNCTION
+
+    #[tokio::test]
+    #[serial]
+    async fn test_delete() {
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+        
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        let key = "Vehicle.Infotainment.Radio.CurrentStation";
+        let value = "1live";
+        let key_value = KeyValue { key: key.to_string(), value: value.to_string() };
+
+        // Act
+        let response_write = client.write(key_value).await.unwrap();
+        let response_delete = client.delete(Key { key: key.to_string() }).await.unwrap();
+        let response_read = client.read(Key { key: key.to_string() }).await.unwrap();
+
+        // Assert
+        assert!(response_write.into_inner().success 
+                    && response_delete.into_inner().success 
+                    && !response_read.into_inner().success);
+
+        // Clean up.
+        let _response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
+        server_task.abort();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_delete_key_does_not_exist() {
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+        
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        let key = "Key.doesNotExist";
+
+        // Act
+        let response_read = client.read(Key { key: key.to_string() }).await.unwrap();
+        let response_delete = client.delete(Key { key: key.to_string() }).await.unwrap();
+
+        // Assert
+        assert!(!response_delete.into_inner().success 
+                    && !response_read.into_inner().success);
+
+        // Clean up.
+        let _response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
+        server_task.abort();
+    }
+
 
 }
