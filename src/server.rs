@@ -1,11 +1,9 @@
-use tonic::{Request, Response, Status};
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use tonic::{Request, Response, Status};
 
 use crate::storage_api::database_server::Database;
-use crate::storage_api::{
-    Key, KeyValue, StandardResponse, ReadResponse, DestroyArguments, 
-};
+use crate::storage_api::{DestroyArguments, Key, KeyValue, ReadResponse, StandardResponse};
 
 use crate::service::DbService;
 
@@ -16,13 +14,14 @@ pub struct DatabaseManager {
 
 impl DatabaseManager {
     pub fn new() -> DatabaseManager {
-        DatabaseManager { db_service: Arc::new(Mutex::new(DbService::new())) }
+        DatabaseManager {
+            db_service: Arc::new(Mutex::new(DbService::new())),
+        }
     }
 }
 
 #[tonic::async_trait]
 impl Database for DatabaseManager {
-
     async fn destroy_db(
         &self,
         _request: Request<DestroyArguments>,
@@ -40,7 +39,11 @@ impl Database for DatabaseManager {
         request: Request<KeyValue>,
     ) -> Result<Response<StandardResponse>, Status> {
         let keyvalue = request.into_inner();
-        let res: (bool, String) = self.db_service.lock().await.write_db(&keyvalue.key, &keyvalue.value);
+        let res: (bool, String) = self
+            .db_service
+            .lock()
+            .await
+            .write_db(&keyvalue.key, &keyvalue.value);
 
         Ok(Response::new(StandardResponse {
             success: res.0,
@@ -48,10 +51,7 @@ impl Database for DatabaseManager {
         }))
     }
 
-    async fn read(
-        &self,
-        request: Request<Key>,
-    ) -> Result<Response<ReadResponse>, Status> {
+    async fn read(&self, request: Request<Key>) -> Result<Response<ReadResponse>, Status> {
         let key: Key = request.into_inner();
         let res: (bool, String, String) = self.db_service.lock().await.read_db(&key.key);
 
@@ -73,16 +73,14 @@ impl Database for DatabaseManager {
     }
 }
 
-
 #[cfg(test)]
 mod tests {
-    use serial_test::serial;
     use super::*;
-    use tonic::transport::Server;
-    use std::net::SocketAddr;
-    use crate::storage_api::database_server::DatabaseServer;
     use crate::storage_api::database_client::DatabaseClient;
-
+    use crate::storage_api::database_server::DatabaseServer;
+    use serial_test::serial;
+    use std::net::SocketAddr;
+    use tonic::transport::Server;
 
     // TEST FOR WRITE FUNCTION
 
@@ -94,7 +92,7 @@ mod tests {
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
-        
+
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
@@ -104,11 +102,19 @@ mod tests {
 
         let key = "Vehicle.Infotainment.Radio.CurrentStation";
         let value = "1live";
-        let key_value = KeyValue { key: key.to_string(), value: value.to_string() };
+        let key_value = KeyValue {
+            key: key.to_string(),
+            value: value.to_string(),
+        };
 
         // Act
         let response = client.write(key_value).await.unwrap();
-        let read_value = client.read(Key { key: key.to_string() }).await.unwrap();
+        let read_value = client
+            .read(Key {
+                key: key.to_string(),
+            })
+            .await
+            .unwrap();
 
         // Assert
         assert!(response.into_inner().success && read_value.into_inner().result == value);
@@ -128,7 +134,7 @@ mod tests {
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
-        
+
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
@@ -138,30 +144,48 @@ mod tests {
 
         let key1 = "Vehicle";
         let value1 = "car";
-        let key_value1 = KeyValue { key: key1.to_string(), value: value1.to_string() };
+        let key_value1 = KeyValue {
+            key: key1.to_string(),
+            value: value1.to_string(),
+        };
 
         let key2 = "test";
         let value2 = "test";
-        let key_value2 = KeyValue { key: key2.to_string(), value: value2.to_string() };
+        let key_value2 = KeyValue {
+            key: key2.to_string(),
+            value: value2.to_string(),
+        };
 
         // Act
         let response1 = client.write(key_value1).await.unwrap();
         let response2 = client.write(key_value2).await.unwrap();
 
-        let read_value1 = client.read(Key { key: key1.to_string() }).await.unwrap();
-        let read_value2 = client.read(Key { key: key2.to_string() }).await.unwrap();
+        let read_value1 = client
+            .read(Key {
+                key: key1.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_value2 = client
+            .read(Key {
+                key: key2.to_string(),
+            })
+            .await
+            .unwrap();
 
         // Assert
-        assert!(read_value1.into_inner().result == value1 
-                    && read_value2.into_inner().result == value2 
-                    && response1.into_inner().success 
-                    && response2.into_inner().success);
+        assert!(
+            read_value1.into_inner().result == value1
+                && read_value2.into_inner().result == value2
+                && response1.into_inner().success
+                && response2.into_inner().success
+        );
 
         // Clean up.
         let _response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
         server_task.abort();
     }
-    
+
     #[tokio::test]
     #[serial]
     async fn test_write_to_node() {
@@ -172,7 +196,7 @@ mod tests {
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
-        
+
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
@@ -182,24 +206,42 @@ mod tests {
 
         let key1 = "Vehicle.Infotainment.Radio.CurrentStation";
         let value1 = "1live";
-        let key_value1 = KeyValue { key: key1.to_string(), value: value1.to_string() };
+        let key_value1 = KeyValue {
+            key: key1.to_string(),
+            value: value1.to_string(),
+        };
 
         let key2 = "Vehicle.Infotainment";
         let value2 = "exists";
-        let key_value2 = KeyValue { key: key2.to_string(), value: value2.to_string() };
+        let key_value2 = KeyValue {
+            key: key2.to_string(),
+            value: value2.to_string(),
+        };
 
         // Act
         let response1 = client.write(key_value1).await.unwrap();
         let response2 = client.write(key_value2).await.unwrap();
 
-        let read_value1 = client.read(Key { key: key1.to_string() }).await.unwrap();
-        let read_value2 = client.read(Key { key: key2.to_string() }).await.unwrap();
+        let read_value1 = client
+            .read(Key {
+                key: key1.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_value2 = client
+            .read(Key {
+                key: key2.to_string(),
+            })
+            .await
+            .unwrap();
 
         // Assert
-        assert!(read_value1.into_inner().result == value1 
-                    && read_value2.into_inner().result == value2
-                    && response1.into_inner().success 
-                    && response2.into_inner().success);
+        assert!(
+            read_value1.into_inner().result == value1
+                && read_value2.into_inner().result == value2
+                && response1.into_inner().success
+                && response2.into_inner().success
+        );
 
         // Clean up.
         let _response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
@@ -216,7 +258,7 @@ mod tests {
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
-        
+
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
@@ -226,17 +268,32 @@ mod tests {
 
         let key = "Vehicle.Infotainment.Radio.CurrentStation";
         let value = "1live";
-        let key_value = KeyValue { key: key.to_string(), value: value.to_string() };
+        let key_value = KeyValue {
+            key: key.to_string(),
+            value: value.to_string(),
+        };
 
         // Act
         let response_write = client.write(key_value).await.unwrap();
-        let response_delete = client.delete(Key { key: key.to_string() }).await.unwrap();
-        let response_read = client.read(Key { key: key.to_string() }).await.unwrap();
+        let response_delete = client
+            .delete(Key {
+                key: key.to_string(),
+            })
+            .await
+            .unwrap();
+        let response_read = client
+            .read(Key {
+                key: key.to_string(),
+            })
+            .await
+            .unwrap();
 
         // Assert
-        assert!(response_write.into_inner().success 
-                    && response_delete.into_inner().success 
-                    && !response_read.into_inner().success);
+        assert!(
+            response_write.into_inner().success
+                && response_delete.into_inner().success
+                && !response_read.into_inner().success
+        );
 
         // Clean up.
         let _response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
@@ -251,7 +308,7 @@ mod tests {
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
-        
+
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
@@ -262,17 +319,24 @@ mod tests {
         let key = "Key.doesNotExist";
 
         // Act
-        let response_read = client.read(Key { key: key.to_string() }).await.unwrap();
-        let response_delete = client.delete(Key { key: key.to_string() }).await.unwrap();
+        let response_read = client
+            .read(Key {
+                key: key.to_string(),
+            })
+            .await
+            .unwrap();
+        let response_delete = client
+            .delete(Key {
+                key: key.to_string(),
+            })
+            .await
+            .unwrap();
 
         // Assert
-        assert!(!response_delete.into_inner().success 
-                    && !response_read.into_inner().success);
+        assert!(!response_delete.into_inner().success && !response_read.into_inner().success);
 
         // Clean up.
         let _response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
         server_task.abort();
     }
-
-
 }
