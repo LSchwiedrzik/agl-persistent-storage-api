@@ -3,7 +3,9 @@ use tokio::sync::Mutex;
 use tonic::{Request, Response, Status};
 
 use crate::storage_api::database_server::Database;
-use crate::storage_api::{DestroyArguments, Key, KeyValue, ReadResponse, StandardResponse};
+use crate::storage_api::{
+    DestroyArguments, Key, KeyValue, ListResponse, ReadResponse, StandardResponse,
+};
 
 use crate::service::DbService;
 
@@ -69,6 +71,14 @@ impl Database for DatabaseManager {
         Ok(Response::new(StandardResponse {
             success: res.0,
             message: res.1,
+        }))
+    }
+
+    async fn search(&self, _request: Request<Key>) -> Result<Response<ListResponse>, Status> {
+        Ok(Response::new(ListResponse {
+            success: false,
+            message: "unimplemented".to_string(),
+            result: vec![],
         }))
     }
 }

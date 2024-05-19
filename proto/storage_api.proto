@@ -14,6 +14,9 @@ service Database {
 
     // Deletes the entry for the given key from the data base
     rpc Delete(Key) returns (StandardResponse);
+
+    // Search existing keys containing given string
+    rpc Search(Key) returns (ListResponse);
 }
 
 message Key {
@@ -40,4 +43,10 @@ message ReadResponse {
     bool success = 1;
     string message = 2;
     string result = 3;
+}
+
+message ListResponse {
+    bool success = 1;
+    string message = 2;
+    repeated string result = 3;
 }
