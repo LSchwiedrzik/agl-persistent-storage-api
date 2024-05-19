@@ -90,9 +90,9 @@ mod tests {
     use crate::storage_api::database_server::DatabaseServer;
     use serial_test::serial;
     use std::net::SocketAddr;
-    use tonic::transport::Server;
+    use tonic::transport::{Channel, Server};
 
-    // TEST FOR WRITE FUNCTION
+    // TESTS FOR WRITE FUNCTION
 
     #[tokio::test]
     #[serial]
@@ -347,6 +347,203 @@ mod tests {
 
         // Clean up.
         let _response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
+        server_task.abort();
+    }
+
+    // TESTS FOR SEARCH FUNCTION
+
+    async fn fill_db_for_search_tests(
+        client: &mut DatabaseClient<Channel>,
+        key1: &str,
+        key2: &str,
+    ) {
+        let value1 = "1live";
+        let key_value1 = KeyValue {
+            key: key1.to_string(),
+            value: value1.to_string(),
+        };
+        let response1 = client.write(key_value1).await.unwrap();
+        assert!(response1.into_inner().success);
+
+        let value2 = "10";
+        let key_value2 = KeyValue {
+            key: key2.to_string(),
+            value: value2.to_string(),
+        };
+        let response2 = client.write(key_value2).await.unwrap();
+        assert!(response2.into_inner().success);
+
+        let key3 = "Vehicle.Infotainment.Display.Color";
+        let value3 = "blue";
+        let key_value3 = KeyValue {
+            key: key3.to_string(),
+            value: value3.to_string(),
+        };
+        let response3 = client.write(key_value3).await.unwrap();
+        assert!(response3.into_inner().success);
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_full_search_key() {
+        // list_keys_containing('Radio') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
+
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        let key1 = "Vehicle.Infotainment.Radio.CurrentStation";
+        let key2 = "Vehicle.Communication.Radio.Volume";
+        fill_db_for_search_tests(&mut client, key1, key2).await;
+
+        // Act
+        let searchstring = "Radio";
+        let search_response = client
+            .search(Key {
+                key: searchstring.to_string(),
+            })
+            .await
+            .unwrap()
+            .into_inner();
+
+        // Assert
+        assert!(search_response.success);
+        assert_eq!(search_response.result, vec![key1, key2]);
+
+        // Clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+        server_task.abort();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_partial_search_key() {
+        // list_keys_containing('Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
+
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        let key1 = "Vehicle.Infotainment.Radio.CurrentStation";
+        let key2 = "Vehicle.Communication.Radio.Volume";
+        fill_db_for_search_tests(&mut client, key1, key2).await;
+
+        // Act
+        let searchstring = "Rad";
+        let search_response = client
+            .search(Key {
+                key: searchstring.to_string(),
+            })
+            .await
+            .unwrap()
+            .into_inner();
+
+        // Assert
+        assert!(search_response.success);
+        assert_eq!(search_response.result, vec![key1, key2]);
+
+        // Clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+        server_task.abort();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_search_key_contains_dot() {
+        // list_keys_containing('nt.Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation')
+
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        let key1 = "Vehicle.Infotainment.Radio.CurrentStation";
+        let key2 = "Vehicle.Communication.Radio.Volume";
+        fill_db_for_search_tests(&mut client, key1, key2).await;
+
+        // Act
+        let searchstring = "nt.Rad";
+        let search_response = client
+            .search(Key {
+                key: searchstring.to_string(),
+            })
+            .await
+            .unwrap()
+            .into_inner();
+
+        // Assert
+        assert!(search_response.success);
+        assert_eq!(search_response.result, vec![key1, key2]);
+
+        // Clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+        server_task.abort();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_empty_search_key() {
+        // list_keys_containing('') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
+
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        let key1 = "Vehicle.Infotainment.Radio.CurrentStation";
+        let key2 = "Vehicle.Communication.Radio.Volume";
+        fill_db_for_search_tests(&mut client, key1, key2).await;
+
+        // Act
+        let searchstring = "nt.Rad";
+        let search_response = client
+            .search(Key {
+                key: searchstring.to_string(),
+            })
+            .await
+            .unwrap()
+            .into_inner();
+
+        // Assert
+        assert!(search_response.success);
+        assert_eq!(search_response.result, vec![key1, key2]);
+
+        // Clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
         server_task.abort();
     }
 }
