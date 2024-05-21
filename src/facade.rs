@@ -38,6 +38,7 @@ impl RocksDbFacade {
     }
 
     pub fn destroy_db(&mut self, path: &str) -> Result<(), std::io::Error> {
+        self.close_db()?;
         DB::destroy(&Options::default(), path)
             .map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error))
     }
@@ -75,5 +76,25 @@ impl RocksDbFacade {
         db_instance
             .delete(key)
             .map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error))
+    }
+
+    pub fn list_all_keys(&mut self) -> Result<Vec<String>, std::io::Error> {
+        let db_instance = self.db_instance.as_ref().ok_or(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "No database opened",
+        ))?;
+        let mut iter = db_instance.raw_iterator();
+        let mut res: Vec<String> = Vec::new();
+        iter.seek_to_first();
+        while iter.valid() {
+            let key_u8 = iter.key().ok_or(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "Found key of type None",
+            ))?;
+            res.push(std::str::from_utf8(key_u8)
+                .map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error))?.to_string());
+            iter.next();
+        }
+        Ok(res)
     }
 }

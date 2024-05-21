@@ -74,11 +74,14 @@ impl Database for DatabaseManager {
         }))
     }
 
-    async fn search(&self, _request: Request<Key>) -> Result<Response<ListResponse>, Status> {
+    async fn search(&self, request: Request<Key>) -> Result<Response<ListResponse>, Status> {
+        let key: Key = request.into_inner();
+        let res: (bool, String, Vec<String>) = self.db_service.lock().await.search_db(&key.key);
+
         Ok(Response::new(ListResponse {
-            success: false,
-            message: "unimplemented".to_string(),
-            result: vec![],
+            success: res.0,
+            message: res.1,
+            result: res.2,
         }))
     }
 }
@@ -417,7 +420,7 @@ mod tests {
 
         // Assert
         assert!(search_response.success);
-        assert_eq!(search_response.result, vec![key1, key2]);
+        assert_eq!(search_response.result, vec![key2, key1]);
 
         // Clean up.
         client.destroy_db(DestroyArguments {}).await.unwrap();
@@ -458,7 +461,7 @@ mod tests {
 
         // Assert
         assert!(search_response.success);
-        assert_eq!(search_response.result, vec![key1, key2]);
+        assert_eq!(search_response.result, vec![key2, key1]);
 
         // Clean up.
         client.destroy_db(DestroyArguments {}).await.unwrap();
@@ -499,7 +502,7 @@ mod tests {
 
         // Assert
         assert!(search_response.success);
-        assert_eq!(search_response.result, vec![key1, key2]);
+        assert_eq!(search_response.result, vec![key1]);
 
         // Clean up.
         client.destroy_db(DestroyArguments {}).await.unwrap();
@@ -529,7 +532,7 @@ mod tests {
         fill_db_for_search_tests(&mut client, key1, key2).await;
 
         // Act
-        let searchstring = "nt.Rad";
+        let searchstring = "";
         let search_response = client
             .search(Key {
                 key: searchstring.to_string(),
@@ -540,7 +543,7 @@ mod tests {
 
         // Assert
         assert!(search_response.success);
-        assert_eq!(search_response.result, vec![key1, key2]);
+        assert_eq!(search_response.result, vec![key2, "Vehicle.Infotainment.Display.Color", key1]);
 
         // Clean up.
         client.destroy_db(DestroyArguments {}).await.unwrap();

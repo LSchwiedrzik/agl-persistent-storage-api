@@ -149,4 +149,32 @@ impl DbService {
             return (false, String::from("Key '") + key + "' does not exist!");
         }
     }
+
+    pub fn search_db(&mut self, substring: &str) -> (bool, String, Vec<String>) {
+        let (is_open, msg) = self.open_db();
+        if !is_open {
+            return (false, msg, Vec::new());
+        }
+        match self.rocks_db_facade.list_all_keys() {
+            Ok(value) => {
+                let mut res: Vec<String> = value.into_iter().filter(|string| string.contains(substring)).collect();
+                res.sort();
+                return (
+                    true,
+                    String::from("Retrieved list of keys containing substring '") + substring + "'",
+                    res,
+                )
+            }
+            Err(e) => {
+                return (
+                    false,
+                    String::from("Error when trying to search for keys containing '")
+                        + substring
+                        + "': "
+                        + &e.to_string(),
+                    Vec::new(),
+                )
+            }
+        }
+    }
 }
