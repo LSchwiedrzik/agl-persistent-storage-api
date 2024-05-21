@@ -1,0 +1,4 @@
+LICENSE
+
+# for source files use rustfmt
+*.rs

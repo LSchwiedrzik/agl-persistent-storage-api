@@ -9,14 +9,28 @@ pub struct DbService {
 
 impl DbService {
     pub fn new() -> DbService {
-        DbService { rocks_db_facade: RocksDbFacade::new() }
+        DbService {
+            rocks_db_facade: RocksDbFacade::new(),
+        }
     }
 
     fn open_db(&mut self) -> (bool, String) {
         match self.rocks_db_facade.open_db(DB_PATH) {
-            Ok(()) => return (true, String::from("Opened database at path '") + DB_PATH + "'"),
-            Err(e) => return (false, String::from("Error when trying to open database at path '")
-                + &DB_PATH + "': " + &e.to_string()),
+            Ok(()) => {
+                return (
+                    true,
+                    String::from("Opened database at path '") + DB_PATH + "'",
+                )
+            }
+            Err(e) => {
+                return (
+                    false,
+                    String::from("Error when trying to open database at path '")
+                        + &DB_PATH
+                        + "': "
+                        + &e.to_string(),
+                )
+            }
         }
     }
 
@@ -33,59 +47,134 @@ impl DbService {
         let (is_open, msg) = self.open_db();
         if !is_open {
             return (false, msg);
-        } 
+        }
         match self.rocks_db_facade.destroy_db(DB_PATH) {
-            Ok(()) => return (true, String::from("Destroyed database at path '") + DB_PATH + "'"),
-            Err(e) => return (false, String::from("Error when trying to destroy database at path '")
-                + DB_PATH + "': " + &e.to_string()),
+            Ok(()) => {
+                return (
+                    true,
+                    String::from("Destroyed database at path '") + DB_PATH + "'",
+                )
+            }
+            Err(e) => {
+                return (
+                    false,
+                    String::from("Error when trying to destroy database at path '")
+                        + DB_PATH
+                        + "': "
+                        + &e.to_string(),
+                )
+            }
         }
     }
 
-    pub fn write_db(&mut self, key:&str, value:&str) -> (bool, String) {
+    pub fn write_db(&mut self, key: &str, value: &str) -> (bool, String) {
         let (is_open, msg) = self.open_db();
         if !is_open {
             return (false, msg);
-        } 
+        }
         match self.rocks_db_facade.write_db(key, value) {
-            Ok(()) => return (true, String::from("Wrote key '") + key + "' and value '" + value + "'"),
-            Err(e) => return (false, String::from("Error when trying to write key '") + key
-                + "' and value '" + value + "': " + &e.to_string()),
+            Ok(()) => {
+                return (
+                    true,
+                    String::from("Wrote key '") + key + "' and value '" + value + "'",
+                )
+            }
+            Err(e) => {
+                return (
+                    false,
+                    String::from("Error when trying to write key '")
+                        + key
+                        + "' and value '"
+                        + value
+                        + "': "
+                        + &e.to_string(),
+                )
+            }
         }
     }
 
-    pub fn read_db(&mut self, key:&str) -> (bool, String, String) {
+    pub fn read_db(&mut self, key: &str) -> (bool, String, String) {
         let (is_open, msg) = self.open_db();
         if !is_open {
-            return (false, msg,  String::from(""));
-        } 
+            return (false, msg, String::from(""));
+        }
         match self.rocks_db_facade.read_db(key) {
-            Ok(value) => return (true, String::from("Retrieved value '") + &value + "' from key '" + key + "'", value),
-            Err(e) => return (false, String::from("Error when trying to retrieve from key '") + key
-                + "': " + &e.to_string(), String::from("")),
+            Ok(value) => {
+                return (
+                    true,
+                    String::from("Retrieved value '") + &value + "' from key '" + key + "'",
+                    value,
+                )
+            }
+            Err(e) => {
+                return (
+                    false,
+                    String::from("Error when trying to retrieve from key '")
+                        + key
+                        + "': "
+                        + &e.to_string(),
+                    String::from(""),
+                )
+            }
         }
     }
 
-    pub fn check_if_key_exists(&mut self, key:&str) -> bool {
+    pub fn check_if_key_exists(&mut self, key: &str) -> bool {
         match self.rocks_db_facade.read_db(key) {
             Ok(_value) => return true,
             Err(_e) => return false,
         }
     }
 
-    pub fn delete_db(&mut self, key:&str) -> (bool, String) {
+    pub fn delete_db(&mut self, key: &str) -> (bool, String) {
         let (is_open, msg) = self.open_db();
         if !is_open {
             return (false, msg);
-        } 
+        }
 
         if self.check_if_key_exists(key) {
             match self.rocks_db_facade.delete_db(key) {
                 Ok(()) => return (true, String::from("Deleted key '") + key + "'"),
-                Err(e) => return (false, String::from("Error when trying to delete key '") + key
-                    + "': " + &e.to_string()),
+                Err(e) => {
+                    return (
+                        false,
+                        String::from("Error when trying to delete key '")
+                            + key
+                            + "': "
+                            + &e.to_string(),
+                    )
+                }
             }
         } else {
-            return (false, String::from("Key '") + key + "' does not exist!")
+            return (false, String::from("Key '") + key + "' does not exist!");
+        }
+    }
+
+    pub fn search_db(&mut self, substring: &str) -> (bool, String, Vec<String>) {
+        let (is_open, msg) = self.open_db();
+        if !is_open {
+            return (false, msg, Vec::new());
+        }
+        match self.rocks_db_facade.list_all_keys() {
+            Ok(value) => {
+                let mut res: Vec<String> = value.into_iter().filter(|string| string.contains(substring)).collect();
+                res.sort();
+                return (
+                    true,
+                    String::from("Retrieved list of keys containing substring '") + substring + "'",
+                    res,
+                )
+            }
+            Err(e) => {
+                return (
+                    false,
+                    String::from("Error when trying to search for keys containing '")
+                        + substring
+                        + "': "
+                        + &e.to_string(),
+                    Vec::new(),
+                )
+            }
         }
     }
 }

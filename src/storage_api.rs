@@ -39,6 +39,16 @@ pub struct ReadResponse {
     #[prost(string, tag = "3")]
     pub result: ::prost::alloc::string::String,
 }
+#[allow(clippy::derive_partial_eq_without_eq)]
+#[derive(Clone, PartialEq, ::prost::Message)]
+pub struct ListResponse {
+    #[prost(bool, tag = "1")]
+    pub success: bool,
+    #[prost(string, tag = "2")]
+    pub message: ::prost::alloc::string::String,
+    #[prost(string, repeated, tag = "3")]
+    pub result: ::prost::alloc::vec::Vec<::prost::alloc::string::String>,
+}
 /// Generated client implementations.
 pub mod database_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
@@ -188,6 +198,26 @@ pub mod database_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
+        /// Search existing keys containing given string
+        pub async fn search(
+            &mut self,
+            request: impl tonic::IntoRequest<super::Key>,
+        ) -> Result<tonic::Response<super::ListResponse>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/storage_api.Database/Search",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -217,6 +247,11 @@ pub mod database_server {
             &self,
             request: tonic::Request<super::Key>,
         ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status>;
+        /// Search existing keys containing given string
+        async fn search(
+            &self,
+            request: tonic::Request<super::Key>,
+        ) -> Result<tonic::Response<super::ListResponse>, tonic::Status>;
     }
     #[derive(Debug)]
     pub struct DatabaseServer<T: Database> {
@@ -412,6 +447,42 @@ pub mod database_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = DeleteSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/storage_api.Database/Search" => {
+                    #[allow(non_camel_case_types)]
+                    struct SearchSvc<T: Database>(pub Arc<T>);
+                    impl<T: Database> tonic::server::UnaryService<super::Key>
+                    for SearchSvc<T> {
+                        type Response = super::ListResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::Key>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move { (*inner).search(request).await };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = SearchSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
