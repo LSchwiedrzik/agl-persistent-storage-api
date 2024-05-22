@@ -36,15 +36,5 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 #[cfg(test)]
 // Unit tests go here
 mod tests {
-    #[test]
-    fn funktioniert_doch_sowieso() {
-        let result = true;
-        assert_eq!(result, true);
-    }
 
-    #[test]
-    fn oder_doch_nicht() {
-        let result = false;
-        assert_eq!(result, true);
-    }
 }

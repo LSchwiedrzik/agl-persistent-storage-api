@@ -84,6 +84,16 @@ impl Database for DatabaseManager {
             result: res.2,
         }))
     }
+
+    async fn delete_recursively_from(&self, request: Request<Key>) -> Result<Response<StandardResponse>, Status> {
+        let key: Key = request.into_inner();
+        let res: (bool, String) = self.db_service.lock().await.delete_recursively_from_db(&key.key);
+
+        Ok(Response::new(StandardResponse{
+            success: res.0,
+            message: res.1,
+        }))
+    }
 }
 
 #[cfg(test)]
@@ -549,4 +559,195 @@ mod tests {
         client.destroy_db(DestroyArguments {}).await.unwrap();
         server_task.abort();
     }
+
+    // TESTS FOR DELETE RECURSIVELY FROM
+
+    #[tokio::test]
+    #[serial]
+    async fn test_delete_recursively() {
+        // delete_recursively_from('Vehicle.Infotainment') 
+        // -> deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
+
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // fill db
+        let key1 = "Vehicle.Infotainment";
+        let value1 = "test";
+        let key_value1 = KeyValue { key: key1.to_string(), value: value1.to_string(), };
+        let response1 = client.write(key_value1).await.unwrap();
+        assert!(response1.into_inner().success);
+
+        let key2 = "Vehicle.Infotainment.Radio.CurrentStation";
+        let value2 = "WDR 4";
+        let key_value2 = KeyValue { key: key2.to_string(), value: value2.to_string(), };
+        let response2 = client.write(key_value2).await.unwrap();
+        assert!(response2.into_inner().success);
+
+        let key3 = "Vehicle.Infotainment.Radio.Volume";
+        let value3 = "99%";
+        let key_value3 = KeyValue { key: key3.to_string(), value: value3.to_string(), };
+        let response3 = client.write(key_value3).await.unwrap();
+        assert!(response3.into_inner().success);
+
+        let key4  = "Vehicle.Infotainment.HVAC.OutdoorTemperature";
+        let value4 = "34 °C";
+        let key_value4 = KeyValue { key: key4.to_string(), value: value4.to_string(),};
+        let response4 = client.write(key_value4).await.unwrap();
+        assert!(response4.into_inner().success);
+
+        // Act
+        let deletion_node = "Vehicle.Infotainment";
+        let delete_recursively_response = client.delete_recursively_from(Key { key: deletion_node.to_string(), }).await.unwrap();
+
+        let read_response1 = client.read(Key { key: key1.to_string(), }).await.unwrap();
+        let read_response2 = client.read(Key { key: key2.to_string(), }).await.unwrap();
+        let read_response3 = client.read(Key { key: key3.to_string(), }).await.unwrap();
+        let read_response4 = client.read(Key { key: key4.to_string(), }).await.unwrap();
+
+        // Assert
+        assert!(delete_recursively_response.into_inner().success
+                    && !read_response1.into_inner().success 
+                    && !read_response2.into_inner().success 
+                    && !read_response3.into_inner().success 
+                    && !read_response4.into_inner().success);
+
+        // Clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+        server_task.abort();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_delete_recursively_vehicle() {
+        // delete_recursively_from('Vehicle') -> 
+        // deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
+
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // fill db
+        let key1 = "Vehicle.Infotainment";
+        let value1 = "test";
+        let key_value1 = KeyValue { key: key1.to_string(), value: value1.to_string(), };
+        let response1 = client.write(key_value1).await.unwrap();
+        assert!(response1.into_inner().success);
+
+        let key2 = "Vehicle.Infotainment.Radio.CurrentStation";
+        let value2 = "WDR 4";
+        let key_value2 = KeyValue { key: key2.to_string(), value: value2.to_string(), };
+        let response2 = client.write(key_value2).await.unwrap();
+        assert!(response2.into_inner().success);
+
+        let key3 = "Vehicle.Infotainment.Radio.Volume";
+        let value3 = "99%";
+        let key_value3 = KeyValue { key: key3.to_string(), value: value3.to_string(), };
+        let response3 = client.write(key_value3).await.unwrap();
+        assert!(response3.into_inner().success);
+
+        let key4  = "Vehicle.Infotainment.HVAC.OutdoorTemperature";
+        let value4 = "34 °C";
+        let key_value4 = KeyValue { key: key4.to_string(), value: value4.to_string(),};
+        let response4 = client.write(key_value4).await.unwrap();
+        assert!(response4.into_inner().success);
+
+        let key5  = "Vehicle.Communication.Radio.Volume";
+        let value5 = "80%";
+        let key_value5 = KeyValue { key: key5.to_string(), value: value5.to_string(),};
+        let response5 = client.write(key_value5).await.unwrap();
+        assert!(response5.into_inner().success);
+
+        // Act
+        let deletion_node = "Vehicle";
+        let delete_recursively_response = client.delete_recursively_from(Key { key: deletion_node.to_string(), }).await.unwrap();
+
+        let read_response1 = client.read(Key { key: key1.to_string(), }).await.unwrap();
+        let read_response2 = client.read(Key { key: key2.to_string(), }).await.unwrap();
+        let read_response3 = client.read(Key { key: key3.to_string(), }).await.unwrap();
+        let read_response4 = client.read(Key { key: key4.to_string(), }).await.unwrap();
+        let read_response5 = client.read(Key { key: key5.to_string(), }).await.unwrap();
+
+        // Assert
+        assert!(delete_recursively_response.into_inner().success
+                    && !read_response1.into_inner().success 
+                    && !read_response2.into_inner().success 
+                    && !read_response3.into_inner().success 
+                    && !read_response4.into_inner().success
+                    && !read_response5.into_inner().success);
+
+        // Clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+        server_task.abort();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_delete_recursively_empty_key() {
+        // delete_recursively_from('Vehicle') -> 
+        // deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
+
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // fill db
+        let key1 = "Vehicle.Infotainment";
+        let value1 = "test";
+        let key_value1 = KeyValue { key: key1.to_string(), value: value1.to_string(), };
+        let response1 = client.write(key_value1).await.unwrap();
+        assert!(response1.into_inner().success);
+
+        let key2 = "Vehicle.Infotainment.Radio.CurrentStation";
+        let value2 = "WDR 4";
+        let key_value2 = KeyValue { key: key2.to_string(), value: value2.to_string(), };
+        let response2 = client.write(key_value2).await.unwrap();
+        assert!(response2.into_inner().success);
+
+        // Act
+        let deletion_node = "";
+        let delete_recursively_response = client.delete_recursively_from(Key { key: deletion_node.to_string(), }).await.unwrap();
+
+        let read_response1 = client.read(Key { key: key1.to_string(), }).await.unwrap();
+        let read_response2 = client.read(Key { key: key2.to_string(), }).await.unwrap();
+
+        // Assert
+        assert!(!delete_recursively_response.into_inner().success
+                    && read_response1.into_inner().success 
+                    && read_response2.into_inner().success);
+
+        // Clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+        server_task.abort();
+    }
+
+
 }

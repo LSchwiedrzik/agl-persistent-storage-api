@@ -177,4 +177,29 @@ impl DbService {
             }
         }
     }
+
+    pub fn delete_recursively_from_db(&mut self, node: &str) -> (bool, String) {
+        let (is_open, msg) = self.open_db();
+        if !is_open {
+            return (false, msg);
+        }
+
+        if node.is_empty() {
+            return (false, "Error: Key String was empty!".to_string());
+        }
+
+        let mut deleted_keys = "Deleted Keys: ".to_string();
+        match self.rocks_db_facade.list_keys_with_prefix(node){
+            Ok(res) => {
+                for key in res {
+                    match self.rocks_db_facade.delete_db(&key) {
+                        Ok(()) => deleted_keys = format!("{} {}", deleted_keys, key),
+                        Err(_e) => return (false, "Error deleting key '".to_string() + &key + "'."),
+                    }
+                }
+                return (true, "Successfully deleted nodes: ".to_string() + &deleted_keys + ".");
+            },
+            Err(_e) => (false, "Error when trying to list keys with prefix '".to_string() + node + "'"),
+        }
+    }
 }

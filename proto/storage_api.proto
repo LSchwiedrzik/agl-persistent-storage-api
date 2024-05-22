@@ -17,6 +17,9 @@ service Database {
 
     // Search existing keys containing given string
     rpc Search(Key) returns (ListResponse);
+
+    // Delete recursively from existing node
+    rpc DeleteRecursivelyFrom(Key) returns (StandardResponse);
 }
 
 message Key {
