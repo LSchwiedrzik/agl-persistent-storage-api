@@ -97,4 +97,27 @@ impl RocksDbFacade {
         }
         Ok(res)
     }
+    
+    pub fn list_keys_with_prefix(&mut self, prefix: &str) -> Result<Vec<String>, std::io::Error> {
+        let db_instance = self.db_instance.as_ref().ok_or(std::io::Error::new(
+            std::io::ErrorKind::Other,
+            "No database opened",
+        ))?;
+        let mut iter = db_instance.raw_iterator();
+        let mut res: Vec<String> = Vec::new();
+        iter.seek(prefix);
+        while iter.valid() {
+            let key_u8 = iter.key().ok_or(std::io::Error::new(
+                std::io::ErrorKind::Other,
+                "Found key of type None",
+            ))?;
+            let key_str: &str = std::str::from_utf8(key_u8).map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error))?;
+            if !key_str.starts_with(prefix) {
+                break;
+            }
+            res.push(key_str.to_string());
+            iter.next();
+        }
+        Ok(res)
+    }
 }

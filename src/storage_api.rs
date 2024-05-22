@@ -218,6 +218,26 @@ pub mod database_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
+        /// Delete recursively from existing node
+        pub async fn delete_recursively_from(
+            &mut self,
+            request: impl tonic::IntoRequest<super::Key>,
+        ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status> {
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
+            let codec = tonic::codec::ProstCodec::default();
+            let path = http::uri::PathAndQuery::from_static(
+                "/storage_api.Database/DeleteRecursivelyFrom",
+            );
+            self.inner.unary(request.into_request(), path, codec).await
+        }
     }
 }
 /// Generated server implementations.
@@ -252,6 +272,11 @@ pub mod database_server {
             &self,
             request: tonic::Request<super::Key>,
         ) -> Result<tonic::Response<super::ListResponse>, tonic::Status>;
+        /// Delete recursively from existing node
+        async fn delete_recursively_from(
+            &self,
+            request: tonic::Request<super::Key>,
+        ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status>;
     }
     #[derive(Debug)]
     pub struct DatabaseServer<T: Database> {
@@ -483,6 +508,44 @@ pub mod database_server {
                     let fut = async move {
                         let inner = inner.0;
                         let method = SearchSvc(inner);
+                        let codec = tonic::codec::ProstCodec::default();
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
+                        let res = grpc.unary(method, req).await;
+                        Ok(res)
+                    };
+                    Box::pin(fut)
+                }
+                "/storage_api.Database/DeleteRecursivelyFrom" => {
+                    #[allow(non_camel_case_types)]
+                    struct DeleteRecursivelyFromSvc<T: Database>(pub Arc<T>);
+                    impl<T: Database> tonic::server::UnaryService<super::Key>
+                    for DeleteRecursivelyFromSvc<T> {
+                        type Response = super::StandardResponse;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::Key>,
+                        ) -> Self::Future {
+                            let inner = self.0.clone();
+                            let fut = async move {
+                                (*inner).delete_recursively_from(request).await
+                            };
+                            Box::pin(fut)
+                        }
+                    }
+                    let accept_compression_encodings = self.accept_compression_encodings;
+                    let send_compression_encodings = self.send_compression_encodings;
+                    let inner = self.inner.clone();
+                    let fut = async move {
+                        let inner = inner.0;
+                        let method = DeleteRecursivelyFromSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
