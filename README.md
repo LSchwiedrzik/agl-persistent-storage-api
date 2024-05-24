@@ -1,6 +1,6 @@
 # Persistent Storage API for the Automotive Grade Linux demo
 
-Our goal is to develop a grpc-API for AGL that serves as persistent storage API
+Our goal is to develop a grpc API for AGL that serves as persistent storage API
 for the demo. The API will be written in Rust and make use of tonic for grpc
 functionality as well as RocksDB as a database backend. Use cases include
 retaining settings over a system shutdown (e.g. audio, HVAC, profile data, Wifi
@@ -25,54 +25,54 @@ architecture:
 
 ## API Specification
 
-- `read(key: string) -> StandardResponse(success: boolean, message: string)`
+- `Read(key: string) -> StandardResponse(success: boolean, message: string)`
 
   - Consumer wants value of existing key, e.g.
     'Vehicle.Infotainment.Radio.CurrentStation':
 
     ```text
-    read('Vehicle.Infotainment.Radio.CurrentStation') -> 'wdr 4'
+    Read('Vehicle.Infotainment.Radio.CurrentStation') -> 'wdr 4'
 
-    read('Vehicle.doesNotExist') -> ERROR
+    Read('Vehicle.doesNotExist') -> ERROR
     ```
 
-- `delete(key: string) -> StandardResponse(success: boolean, message: string)`
+- `Delete(key: string) -> StandardResponse(success: boolean, message: string)`
 
-  - Customer wants to delete an existing key+value, e.g.
+  - Consumer wants to delete an existing key+value, e.g.
     'Vehicle.Infotainment.Radio.CurrentStation':
 
     ```text
-    delete('Vehicle.Infotainment.Radio.CurrentStation') -> Response
+    Delete('Vehicle.Infotainment.Radio.CurrentStation') -> Response
 
-    delete('Vehicle.doesNotExist') -> ERROR
+    Delete('Vehicle.doesNotExist') -> ERROR
     ```
 
-- `write(key: string, value: string) -> ReadResponse(success: boolean, message: string, value: string)`
+- `Write(key: string, value: string) -> ReadResponse(success: boolean, message: string, value: string)`
 
   - Consumer wants to save key+value (e.g.
     'Vehicle.Infotainment.Radio.CurrentStation':'hr5').
   - This overwrites existing value under key.
 
     ```text
-    write('Vehicle.Infotainment.Radio.CurrentStation':'1live') -> Response
+    Write('Vehicle.Infotainment.Radio.CurrentStation':'1live') -> Response
 
-    write('Vehicle.Infotainment':'yes') -> Response
+    Write('Vehicle.Infotainment':'yes') -> Response
 
-    write('test':'1') -> Response
+    Write('test':'1') -> Response
     ```
 
-- `list_keys_containing(string) -> ListResponse(success: boolean, message: string, keys: repeated string)`
+- `Search(string) -> ListResponse(success: boolean, message: string, keys: repeated string)`
 
   - Consumer wants to see all keys that contain string, e.g. 'Radio'
 
     ```text
-    list_keys_containing('Radio') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
+    Search('Radio') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
 
-    list_keys_containing('Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
+    Search('Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
 
-    list_keys_containing('nt.Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation')
+    Search('nt.Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation')
 
-    list_keys_containing('') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
+    Search('') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
     ```
 
 - `list_nodes_starting_in(node: string, level: optional int) -> ListResponse(boolean, message, repeated string keys)`
@@ -102,18 +102,18 @@ architecture:
     list_nodes_starting_in('', 1) -> ('Vehicle', 'test')
     ```
 
-- `delete_recursively_from(node: string) -> StandardResponse`
+- `DeleteRecursivelyFrom(node: string) -> StandardResponse`
 
   - Consumer wants to delete all keys that start in `$string`, e.g.
     'Vehicle.Infotainment'
   - `$string = ''` returns `ERROR`
 
     ```text
-    delete_recursively_from('Vehicle.Infotainment') -> // deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
+    DeleteRecursivelyFrom('Vehicle.Infotainment') -> // deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
 
-    delete_recursively_from('Vehicle') -> // deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
+    DeleteRecursivelyFrom('Vehicle') -> // deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
 
-    delete_recursively_from('') -> ERROR
+    DeleteRecursivelyFrom('') -> ERROR
     ```
 
 ## Example Tree
