@@ -1,6 +1,6 @@
 use crate::facade::RocksDbFacade;
 
-const DB_PATH: &str = "testpath";
+const DB_PATH: &str = "rocksdb";
 
 #[derive(Debug)]
 pub struct DbService {
