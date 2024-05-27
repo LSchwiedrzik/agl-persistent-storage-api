@@ -3,6 +3,8 @@
 pub struct Key {
     #[prost(string, tag = "1")]
     pub key: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub namespace: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -17,6 +19,8 @@ pub struct KeyValue {
     pub key: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
     pub value: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub namespace: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -60,8 +64,8 @@ pub struct ListResponse {
 /// Generated client implementations.
 pub mod database_client {
     #![allow(unused_variables, dead_code, missing_docs, clippy::let_unit_value)]
-    use tonic::codegen::http::Uri;
     use tonic::codegen::*;
+    use tonic::codegen::http::Uri;
     #[derive(Debug, Clone)]
     pub struct DatabaseClient<T> {
         inner: tonic::client::Grpc<T>,
@@ -105,8 +109,9 @@ pub mod database_client {
                     <T as tonic::client::GrpcService<tonic::body::BoxBody>>::ResponseBody,
                 >,
             >,
-            <T as tonic::codegen::Service<http::Request<tonic::body::BoxBody>>>::Error:
-                Into<StdError> + Send + Sync,
+            <T as tonic::codegen::Service<
+                http::Request<tonic::body::BoxBody>,
+            >>::Error: Into<StdError> + Send + Sync,
         {
             DatabaseClient::new(InterceptedService::new(inner, interceptor))
         }
@@ -130,14 +135,19 @@ pub mod database_client {
             &mut self,
             request: impl tonic::IntoRequest<super::DestroyArguments>,
         ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/storage_api.Database/DestroyDB");
+            let path = http::uri::PathAndQuery::from_static(
+                "/storage_api.Database/DestroyDB",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
         /// Writes a key-value pair to the data base
@@ -145,14 +155,19 @@ pub mod database_client {
             &mut self,
             request: impl tonic::IntoRequest<super::KeyValue>,
         ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/storage_api.Database/Write");
+            let path = http::uri::PathAndQuery::from_static(
+                "/storage_api.Database/Write",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
         /// Reads a value from the data base, if the given key exists, otherwise, the ReadResponse will have "success = false"
@@ -160,14 +175,19 @@ pub mod database_client {
             &mut self,
             request: impl tonic::IntoRequest<super::Key>,
         ) -> Result<tonic::Response<super::ReadResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/storage_api.Database/Read");
+            let path = http::uri::PathAndQuery::from_static(
+                "/storage_api.Database/Read",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
         /// Deletes the entry for the given key from the data base
@@ -175,14 +195,19 @@ pub mod database_client {
             &mut self,
             request: impl tonic::IntoRequest<super::Key>,
         ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/storage_api.Database/Delete");
+            let path = http::uri::PathAndQuery::from_static(
+                "/storage_api.Database/Delete",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
         /// Search existing keys containing given string
@@ -190,14 +215,19 @@ pub mod database_client {
             &mut self,
             request: impl tonic::IntoRequest<super::Key>,
         ) -> Result<tonic::Response<super::ListResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static("/storage_api.Database/Search");
+            let path = http::uri::PathAndQuery::from_static(
+                "/storage_api.Database/Search",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
         /// Delete recursively from existing node
@@ -205,15 +235,19 @@ pub mod database_client {
             &mut self,
             request: impl tonic::IntoRequest<super::Key>,
         ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path =
-                http::uri::PathAndQuery::from_static("/storage_api.Database/DeleteRecursivelyFrom");
+            let path = http::uri::PathAndQuery::from_static(
+                "/storage_api.Database/DeleteRecursivelyFrom",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
         /// Returns all nodes in subtree with root 'node' and depth of exactly 'layers'
@@ -221,15 +255,19 @@ pub mod database_client {
             &mut self,
             request: impl tonic::IntoRequest<super::SubtreeInfo>,
         ) -> Result<tonic::Response<super::ListResponse>, tonic::Status> {
-            self.inner.ready().await.map_err(|e| {
-                tonic::Status::new(
-                    tonic::Code::Unknown,
-                    format!("Service was not ready: {}", e.into()),
-                )
-            })?;
+            self.inner
+                .ready()
+                .await
+                .map_err(|e| {
+                    tonic::Status::new(
+                        tonic::Code::Unknown,
+                        format!("Service was not ready: {}", e.into()),
+                    )
+                })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path =
-                http::uri::PathAndQuery::from_static("/storage_api.Database/NodesStartingIn");
+            let path = http::uri::PathAndQuery::from_static(
+                "/storage_api.Database/NodesStartingIn",
+            );
             self.inner.unary(request.into_request(), path, codec).await
         }
     }
@@ -296,7 +334,10 @@ pub mod database_server {
                 send_compression_encodings: Default::default(),
             }
         }
-        pub fn with_interceptor<F>(inner: T, interceptor: F) -> InterceptedService<Self, F>
+        pub fn with_interceptor<F>(
+            inner: T,
+            interceptor: F,
+        ) -> InterceptedService<Self, F>
         where
             F: tonic::service::Interceptor,
         {
@@ -324,7 +365,10 @@ pub mod database_server {
         type Response = http::Response<tonic::body::BoxBody>;
         type Error = std::convert::Infallible;
         type Future = BoxFuture<Self::Response, Self::Error>;
-        fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
+        fn poll_ready(
+            &mut self,
+            _cx: &mut Context<'_>,
+        ) -> Poll<Result<(), Self::Error>> {
             Poll::Ready(Ok(()))
         }
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
@@ -333,9 +377,15 @@ pub mod database_server {
                 "/storage_api.Database/DestroyDB" => {
                     #[allow(non_camel_case_types)]
                     struct DestroyDBSvc<T: Database>(pub Arc<T>);
-                    impl<T: Database> tonic::server::UnaryService<super::DestroyArguments> for DestroyDBSvc<T> {
+                    impl<
+                        T: Database,
+                    > tonic::server::UnaryService<super::DestroyArguments>
+                    for DestroyDBSvc<T> {
                         type Response = super::StandardResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
                         fn call(
                             &mut self,
                             request: tonic::Request<super::DestroyArguments>,
@@ -352,10 +402,11 @@ pub mod database_server {
                         let inner = inner.0;
                         let method = DestroyDBSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
                     };
@@ -364,9 +415,13 @@ pub mod database_server {
                 "/storage_api.Database/Write" => {
                     #[allow(non_camel_case_types)]
                     struct WriteSvc<T: Database>(pub Arc<T>);
-                    impl<T: Database> tonic::server::UnaryService<super::KeyValue> for WriteSvc<T> {
+                    impl<T: Database> tonic::server::UnaryService<super::KeyValue>
+                    for WriteSvc<T> {
                         type Response = super::StandardResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
                         fn call(
                             &mut self,
                             request: tonic::Request<super::KeyValue>,
@@ -383,10 +438,11 @@ pub mod database_server {
                         let inner = inner.0;
                         let method = WriteSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
                     };
@@ -395,10 +451,17 @@ pub mod database_server {
                 "/storage_api.Database/Read" => {
                     #[allow(non_camel_case_types)]
                     struct ReadSvc<T: Database>(pub Arc<T>);
-                    impl<T: Database> tonic::server::UnaryService<super::Key> for ReadSvc<T> {
+                    impl<T: Database> tonic::server::UnaryService<super::Key>
+                    for ReadSvc<T> {
                         type Response = super::ReadResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-                        fn call(&mut self, request: tonic::Request<super::Key>) -> Self::Future {
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::Key>,
+                        ) -> Self::Future {
                             let inner = self.0.clone();
                             let fut = async move { (*inner).read(request).await };
                             Box::pin(fut)
@@ -411,10 +474,11 @@ pub mod database_server {
                         let inner = inner.0;
                         let method = ReadSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
                     };
@@ -423,10 +487,17 @@ pub mod database_server {
                 "/storage_api.Database/Delete" => {
                     #[allow(non_camel_case_types)]
                     struct DeleteSvc<T: Database>(pub Arc<T>);
-                    impl<T: Database> tonic::server::UnaryService<super::Key> for DeleteSvc<T> {
+                    impl<T: Database> tonic::server::UnaryService<super::Key>
+                    for DeleteSvc<T> {
                         type Response = super::StandardResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-                        fn call(&mut self, request: tonic::Request<super::Key>) -> Self::Future {
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::Key>,
+                        ) -> Self::Future {
                             let inner = self.0.clone();
                             let fut = async move { (*inner).delete(request).await };
                             Box::pin(fut)
@@ -439,10 +510,11 @@ pub mod database_server {
                         let inner = inner.0;
                         let method = DeleteSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
                     };
@@ -451,10 +523,17 @@ pub mod database_server {
                 "/storage_api.Database/Search" => {
                     #[allow(non_camel_case_types)]
                     struct SearchSvc<T: Database>(pub Arc<T>);
-                    impl<T: Database> tonic::server::UnaryService<super::Key> for SearchSvc<T> {
+                    impl<T: Database> tonic::server::UnaryService<super::Key>
+                    for SearchSvc<T> {
                         type Response = super::ListResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-                        fn call(&mut self, request: tonic::Request<super::Key>) -> Self::Future {
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::Key>,
+                        ) -> Self::Future {
                             let inner = self.0.clone();
                             let fut = async move { (*inner).search(request).await };
                             Box::pin(fut)
@@ -467,10 +546,11 @@ pub mod database_server {
                         let inner = inner.0;
                         let method = SearchSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
                     };
@@ -479,13 +559,21 @@ pub mod database_server {
                 "/storage_api.Database/DeleteRecursivelyFrom" => {
                     #[allow(non_camel_case_types)]
                     struct DeleteRecursivelyFromSvc<T: Database>(pub Arc<T>);
-                    impl<T: Database> tonic::server::UnaryService<super::Key> for DeleteRecursivelyFromSvc<T> {
+                    impl<T: Database> tonic::server::UnaryService<super::Key>
+                    for DeleteRecursivelyFromSvc<T> {
                         type Response = super::StandardResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
-                        fn call(&mut self, request: tonic::Request<super::Key>) -> Self::Future {
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
+                        fn call(
+                            &mut self,
+                            request: tonic::Request<super::Key>,
+                        ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut =
-                                async move { (*inner).delete_recursively_from(request).await };
+                            let fut = async move {
+                                (*inner).delete_recursively_from(request).await
+                            };
                             Box::pin(fut)
                         }
                     }
@@ -496,10 +584,11 @@ pub mod database_server {
                         let inner = inner.0;
                         let method = DeleteRecursivelyFromSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
                     };
@@ -508,15 +597,21 @@ pub mod database_server {
                 "/storage_api.Database/NodesStartingIn" => {
                     #[allow(non_camel_case_types)]
                     struct NodesStartingInSvc<T: Database>(pub Arc<T>);
-                    impl<T: Database> tonic::server::UnaryService<super::SubtreeInfo> for NodesStartingInSvc<T> {
+                    impl<T: Database> tonic::server::UnaryService<super::SubtreeInfo>
+                    for NodesStartingInSvc<T> {
                         type Response = super::ListResponse;
-                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
+                        type Future = BoxFuture<
+                            tonic::Response<Self::Response>,
+                            tonic::Status,
+                        >;
                         fn call(
                             &mut self,
                             request: tonic::Request<super::SubtreeInfo>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move { (*inner).nodes_starting_in(request).await };
+                            let fut = async move {
+                                (*inner).nodes_starting_in(request).await
+                            };
                             Box::pin(fut)
                         }
                     }
@@ -527,23 +622,28 @@ pub mod database_server {
                         let inner = inner.0;
                         let method = NodesStartingInSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
-                            accept_compression_encodings,
-                            send_compression_encodings,
-                        );
+                        let mut grpc = tonic::server::Grpc::new(codec)
+                            .apply_compression_config(
+                                accept_compression_encodings,
+                                send_compression_encodings,
+                            );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)
                 }
-                _ => Box::pin(async move {
-                    Ok(http::Response::builder()
-                        .status(200)
-                        .header("grpc-status", "12")
-                        .header("content-type", "application/grpc")
-                        .body(empty_body())
-                        .unwrap())
-                }),
+                _ => {
+                    Box::pin(async move {
+                        Ok(
+                            http::Response::builder()
+                                .status(200)
+                                .header("grpc-status", "12")
+                                .header("content-type", "application/grpc")
+                                .body(empty_body())
+                                .unwrap(),
+                        )
+                    })
+                }
             }
         }
     }

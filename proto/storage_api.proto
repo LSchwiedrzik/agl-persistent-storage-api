@@ -27,6 +27,7 @@ service Database {
 
 message Key {
     string key = 1;
+    string namespace = 2;
 }
 
 message Value {
@@ -36,6 +37,7 @@ message Value {
 message KeyValue {
     string key = 1;
     string value = 2;
+    string namespace = 3;
 }
 
 message SubtreeInfo {
