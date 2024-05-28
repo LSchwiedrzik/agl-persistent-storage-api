@@ -91,13 +91,16 @@ impl RocksDbFacade {
                 std::io::ErrorKind::Other,
                 "Found key of type None",
             ))?;
-            res.push(std::str::from_utf8(key_u8)
-                .map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error))?.to_string());
+            res.push(
+                std::str::from_utf8(key_u8)
+                    .map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error))?
+                    .to_string(),
+            );
             iter.next();
         }
         Ok(res)
     }
-    
+
     pub fn list_keys_with_prefix(&mut self, prefix: &str) -> Result<Vec<String>, std::io::Error> {
         let db_instance = self.db_instance.as_ref().ok_or(std::io::Error::new(
             std::io::ErrorKind::Other,
@@ -111,7 +114,8 @@ impl RocksDbFacade {
                 std::io::ErrorKind::Other,
                 "Found key of type None",
             ))?;
-            let key_str: &str = std::str::from_utf8(key_u8).map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error))?;
+            let key_str: &str = std::str::from_utf8(key_u8)
+                .map_err(|error| std::io::Error::new(std::io::ErrorKind::Other, error))?;
             if !key_str.starts_with(prefix) {
                 break;
             }
@@ -119,5 +123,29 @@ impl RocksDbFacade {
             iter.next();
         }
         Ok(res)
+    }
+}
+
+#[cfg(test)]
+// Unit tests go here
+mod tests {
+    use crate::facade::*;
+
+    #[test]
+    fn list_keys_with_prefix_test() {
+        let mut rdb = RocksDbFacade::new();
+        rdb.destroy_db("testpath").unwrap();
+        rdb.open_db("testpath").unwrap();
+        rdb.write_db("cb", "cb").unwrap();
+        rdb.write_db("ab", "ab").unwrap();
+        rdb.write_db("a", "a").unwrap();
+        rdb.write_db("b", "b").unwrap();
+        rdb.write_db("ac", "ac").unwrap();
+        rdb.write_db("c", "c").unwrap();
+
+        let mut result = rdb.list_keys_with_prefix("a").unwrap();
+        result.sort();
+        assert_eq!(result, vec!["a", "ab", "ac"]);
+        rdb.destroy_db("testpath").unwrap();
     }
 }

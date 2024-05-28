@@ -20,6 +20,9 @@ service Database {
 
     // Delete recursively from existing node
     rpc DeleteRecursivelyFrom(Key) returns (StandardResponse);
+
+    // Returns all nodes in subtree with root 'node' and depth of exactly 'layers'
+    rpc NodesStartingIn(SubtreeInfo) returns (ListResponse);
 }
 
 message Key {
@@ -33,6 +36,11 @@ message Value {
 message KeyValue {
     string key = 1;
     string value = 2;
+}
+
+message SubtreeInfo {
+    string node = 1;
+    optional int32 layers = 2;
 }
 
 message DestroyArguments {}

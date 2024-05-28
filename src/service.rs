@@ -157,13 +157,16 @@ impl DbService {
         }
         match self.rocks_db_facade.list_all_keys() {
             Ok(value) => {
-                let mut res: Vec<String> = value.into_iter().filter(|string| string.contains(substring)).collect();
+                let mut res: Vec<String> = value
+                    .into_iter()
+                    .filter(|string| string.contains(substring))
+                    .collect();
                 res.sort();
                 return (
                     true,
                     String::from("Retrieved list of keys containing substring '") + substring + "'",
                     res,
-                )
+                );
             }
             Err(e) => {
                 return (
@@ -189,17 +192,137 @@ impl DbService {
         }
 
         let mut deleted_keys = "Deleted Keys: ".to_string();
-        match self.rocks_db_facade.list_keys_with_prefix(node){
+        match self.rocks_db_facade.list_keys_with_prefix(node) {
             Ok(res) => {
                 for key in res {
                     match self.rocks_db_facade.delete_db(&key) {
                         Ok(()) => deleted_keys = format!("{} {}", deleted_keys, key),
-                        Err(_e) => return (false, "Error deleting key '".to_string() + &key + "'."),
+                        Err(_e) => {
+                            return (false, "Error deleting key '".to_string() + &key + "'.")
+                        }
                     }
                 }
-                return (true, "Successfully deleted nodes: ".to_string() + &deleted_keys + ".");
-            },
-            Err(_e) => (false, "Error when trying to list keys with prefix '".to_string() + node + "'"),
+                return (
+                    true,
+                    "Successfully deleted nodes: ".to_string() + &deleted_keys + ".",
+                );
+            }
+            Err(_e) => (
+                false,
+                "Error when trying to list keys with prefix '".to_string() + node + "'",
+            ),
+        }
+    }
+
+    pub fn nodes_starting_in(
+        &mut self,
+        node: &str,
+        layers: Option<i32>,
+    ) -> (bool, String, Vec<String>) {
+        let l = layers.unwrap_or(1);
+        if l < 0 {
+            return (
+                false,
+                String::from("Error when trying to list nodes starting in '")
+                    + node
+                    + "' exactly "
+                    + &l.to_string()
+                    + " layers deep: layers must be non-negative",
+                Vec::new(),
+            );
+        }
+        let (is_open, msg) = self.open_db();
+        if !is_open {
+            return (false, msg, Vec::new());
+        }
+        let mut node_dot = String::from(node);
+        if !node.is_empty() {
+            node_dot.push('.');
+        }
+        match self.rocks_db_facade.list_keys_with_prefix(&node_dot) {
+            Ok(mut value) => {
+                if l == 0 {
+                    if self.check_if_key_exists(node) {
+                        value.push(String::from(node));
+                    }
+                    if value.is_empty() && !node.is_empty() {
+                        return (
+                            false,
+                            String::from("Error when trying to list nodes starting in '")
+                                + node
+                                + "' exactly "
+                                + &l.to_string()
+                                + " layers deep: node '"
+                                + node
+                                + "' doesn't exist",
+                            Vec::new(),
+                        );
+                    }
+                    value.sort();
+                    return (
+                        true,
+                        String::from("Retrieved list of keys starting in '")
+                            + node
+                            + "' any number of layers deep (special case layers = '0')",
+                        value,
+                    );
+                } else {
+                    if value.is_empty() && !node.is_empty() && !self.check_if_key_exists(node) {
+                        return (
+                            false,
+                            String::from("Error when trying to list nodes starting in '")
+                                + node
+                                + "' exactly "
+                                + &l.to_string()
+                                + " layers deep: node '"
+                                + node
+                                + "' doesn't exist",
+                            Vec::new(),
+                        );
+                    }
+                    let total_depth: i32 =
+                        node_dot.chars().filter(|&c| c == '.').count() as i32 - 1 + l;
+                    let mut res: Vec<String> = Vec::new();
+                    for key in value.iter_mut() {
+                        let mut count = 0;
+                        for (i, c) in key.chars().enumerate() {
+                            if c == '.' {
+                                count += 1;
+                                if count > total_depth {
+                                    res.push(key[..i].to_string());
+                                    break;
+                                }
+                            }
+                        }
+                        if count == total_depth {
+                            res.push(key.to_string());
+                        }
+                    }
+                    res.sort();
+                    res.dedup();
+                    return (
+                        true,
+                        String::from("Retrieved list of nodes starting in '")
+                            + node
+                            + "' exactly "
+                            + &l.to_string()
+                            + " layers deep",
+                        res,
+                    );
+                }
+            }
+            Err(e) => {
+                return (
+                    false,
+                    String::from("Error when trying to list nodes starting in '")
+                        + node
+                        + "' exactly "
+                        + &l.to_string()
+                        + " layers deep: "
+                        + &e.to_string(),
+                    Vec::new(),
+                )
+            }
         }
     }
 }

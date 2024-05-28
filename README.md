@@ -80,7 +80,7 @@ architecture:
   - Consumer wants to see all nodes that start in `$string` exactly `$int`
     layers deep, e.g. 'Vehicle.Infotainment'
 
-    - `$int=-1` lists all keys that start in `$string` any number of layers deep
+    - `$int=0` lists all keys that start in `$string` any number of layers deep
     - `$int=` default value is 1
     - `$string=''` returns root node
 
@@ -89,17 +89,22 @@ architecture:
 
     list_nodes_starting_in('Vehicle.Infotainment', 2) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
 
-    list_nodes_starting_in('Vehicle', -1) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume', 'Vehicle.Infotainment')
+    list_nodes_starting_in('Vehicle', 0) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume', 'Vehicle.Infotainment')
 
-    list_nodes_starting_in('Vehicle.Infotainment', -1) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Infotainment')
-
-    list_nodes_starting_in('Vehicle.Infotainment', 0) -> ('Vehicle.Infotainment')
+    list_nodes_starting_in('', 0) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume', 'Vehicle.Infotainment', 'test')
 
     list_nodes_starting_in('Vehicle.Infotainment') -> ('Vehicle.Infotainment.Radio', 'Vehicle.Infotainment.HVAC')
 
-    list_nodes_starting_in('') -> ('Vehicle', 'test')
-
     list_nodes_starting_in('', 1) -> ('Vehicle', 'test')
+
+    list_nodes_starting_in('Vehicle.Infotainment.Radio.Volume', 1) -> ()
+
+    list_nodes_starting_in('Vehicle', -1) -> ERROR
+
+    list_nodes_starting_in('Vehicle.DoesNotExist', 1) -> ERROR
+
+    For empty data base:
+    list_nodes_starting_in('', 1) -> ()
     ```
 
 - `DeleteRecursivelyFrom(node: string) -> StandardResponse`
