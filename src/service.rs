@@ -202,34 +202,18 @@ impl DbService {
             .list_keys_with_prefix(namespace_prefix.as_str())
         {
             Ok(value) => {
-
-                //let namespace_prefix = format!("{namespace}_.");
-                //let mut res: Vec<String> = value.iter_mut()
-                //for string in value.iter_mut() {
-                //    string = string.strip_prefix(namespace_prefix.as_str());
-                //}
                 let mut res = value
                     .into_iter()
-                    .filter(|string| string
-                        .contains(substring)/*&& string.starts_with(namespace_prefix.as_str())*/)
-                    /*.map(|string| string //THIS IS THE MOST RECENT ATTEMPT - BUYER BEWARE!
-                        .strip_prefix(namespace_prefix.as_str()).expect("Weird error!"))*/
+                    .filter(|string| string.contains(substring))
+                    .map(|string| {
+                        string
+                            .strip_prefix(namespace_prefix.as_str())
+                            .expect("nothing left after stripping prefix")
+                            .to_owned()
+                    })
                     .collect::<Vec<String>>();
-                /*for x in &mut res {
-                    for y in x {
-                        if x.contains(substring) {
-                            x = x.strip_prefix(namespace_prefix.to_str())
-                        }
-                    }
-                }*/
-
-                /*for string in &res {
-                    //string = string.replace(string, "");
-                    string = string.strip_prefix(namespace_prefix.as_str()).to_string();
-                }*/
-
+                
                 res.sort();
-                //res = res.into_iter().map(|string| string.strip_prefix("_.")).collect();
                 return (
                     true,
                     String::from("Retrieved list of keys containing substring '")
@@ -239,7 +223,7 @@ impl DbService {
                         + "'",
                     res,
                 );
-            } //s.retain(|c| !r#"(),".;:'"#.contains(c));
+            }
             Err(e) => {
                 return (
                     false,
