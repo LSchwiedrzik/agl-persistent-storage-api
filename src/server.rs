@@ -41,11 +41,11 @@ impl Database for DatabaseManager {
         request: Request<KeyValue>,
     ) -> Result<Response<StandardResponse>, Status> {
         let keyvalue = request.into_inner();
-        let res: (bool, String) = self
-            .db_service
-            .lock()
-            .await
-            .write_db(&keyvalue.key, &keyvalue.value, &keyvalue.namespace);
+        let res: (bool, String) = self.db_service.lock().await.write_db(
+            &keyvalue.key,
+            &keyvalue.value,
+            &keyvalue.namespace,
+        );
 
         Ok(Response::new(StandardResponse {
             success: res.0,
@@ -55,7 +55,11 @@ impl Database for DatabaseManager {
 
     async fn read(&self, request: Request<Key>) -> Result<Response<ReadResponse>, Status> {
         let key: Key = request.into_inner();
-        let res: (bool, String, String) = self.db_service.lock().await.read_db(&key.key, &key.namespace);
+        let res: (bool, String, String) = self
+            .db_service
+            .lock()
+            .await
+            .read_db(&key.key, &key.namespace);
 
         Ok(Response::new(ReadResponse {
             success: res.0,
@@ -66,7 +70,11 @@ impl Database for DatabaseManager {
 
     async fn delete(&self, request: Request<Key>) -> Result<Response<StandardResponse>, Status> {
         let key = request.into_inner();
-        let res: (bool, String) = self.db_service.lock().await.delete_db(&key.key, &key.namespace);
+        let res: (bool, String) = self
+            .db_service
+            .lock()
+            .await
+            .delete_db(&key.key, &key.namespace);
 
         Ok(Response::new(StandardResponse {
             success: res.0,
@@ -76,7 +84,11 @@ impl Database for DatabaseManager {
 
     async fn search(&self, request: Request<Key>) -> Result<Response<ListResponse>, Status> {
         let key: Key = request.into_inner();
-        let res: (bool, String, Vec<String>) = self.db_service.lock().await.search_db(&key.key, &key.namespace);
+        let res: (bool, String, Vec<String>) = self
+            .db_service
+            .lock()
+            .await
+            .search_db(&key.key, &key.namespace);
 
         Ok(Response::new(ListResponse {
             success: res.0,
@@ -90,7 +102,11 @@ impl Database for DatabaseManager {
         request: Request<Key>,
     ) -> Result<Response<StandardResponse>, Status> {
         let key: Key = request.into_inner();
-        let res: (bool, String) = self.db_service.lock().await.delete_recursively_from_db(&key.key, &key.namespace);
+        let res: (bool, String) = self
+            .db_service
+            .lock()
+            .await
+            .delete_recursively_from_db(&key.key, &key.namespace);
 
         Ok(Response::new(StandardResponse {
             success: res.0,
@@ -838,7 +854,11 @@ mod tests {
         let key1 = "Vehicle.Infotainment";
         let value1 = "test";
         let namespace1 = "";
-        let key_value1 = KeyValue { key: key1.to_string(), value: value1.to_string(), namespace: namespace1.to_string(), };
+        let key_value1 = KeyValue {
+            key: key1.to_string(),
+            value: value1.to_string(),
+            namespace: namespace1.to_string(),
+        };
 
         let response1 = client.write(key_value1).await.unwrap();
         assert!(response1.into_inner().success);
@@ -846,7 +866,11 @@ mod tests {
         let key2 = "Vehicle.Infotainment.Radio.CurrentStation";
         let value2 = "WDR 4";
         let namespace2 = "";
-        let key_value2 = KeyValue { key: key2.to_string(), value: value2.to_string(), namespace: namespace2.to_string(), };
+        let key_value2 = KeyValue {
+            key: key2.to_string(),
+            value: value2.to_string(),
+            namespace: namespace2.to_string(),
+        };
 
         let response2 = client.write(key_value2).await.unwrap();
         assert!(response2.into_inner().success);
@@ -854,7 +878,11 @@ mod tests {
         let key3 = "Vehicle.Infotainment.Radio.Volume";
         let value3 = "99%";
         let namespace3 = "";
-        let key_value3 = KeyValue { key: key3.to_string(), value: value3.to_string(), namespace: namespace3.to_string(), };
+        let key_value3 = KeyValue {
+            key: key3.to_string(),
+            value: value3.to_string(),
+            namespace: namespace3.to_string(),
+        };
 
         let response3 = client.write(key_value3).await.unwrap();
         assert!(response3.into_inner().success);
@@ -862,7 +890,11 @@ mod tests {
         let key4 = "Vehicle.Infotainment.HVAC.OutdoorTemperature";
         let value4 = "34 °C";
         let namespace4 = "";
-        let key_value4 = KeyValue { key: key4.to_string(), value: value4.to_string(), namespace: namespace4.to_string(), };
+        let key_value4 = KeyValue {
+            key: key4.to_string(),
+            value: value4.to_string(),
+            namespace: namespace4.to_string(),
+        };
 
         let response4 = client.write(key_value4).await.unwrap();
         assert!(response4.into_inner().success);
@@ -870,28 +902,70 @@ mod tests {
         let key5 = "Private.Info";
         let value5 = "test";
         let namespace5 = "AppName";
-        let key_value5 = KeyValue { key: key5.to_string(), value: value5.to_string(), namespace: namespace5.to_string(), };
+        let key_value5 = KeyValue {
+            key: key5.to_string(),
+            value: value5.to_string(),
+            namespace: namespace5.to_string(),
+        };
         let response5 = client.write(key_value5).await.unwrap();
         assert!(response5.into_inner().success);
 
         // Act
         let deletion_node = "Vehicle.Infotainment";
         let deletion_namespace = "";
-        let delete_recursively_response = client.delete_recursively_from(Key { key: deletion_node.to_string(), namespace: deletion_namespace.to_string(), }).await.unwrap();
+        let delete_recursively_response = client
+            .delete_recursively_from(Key {
+                key: deletion_node.to_string(),
+                namespace: deletion_namespace.to_string(),
+            })
+            .await
+            .unwrap();
 
-        let read_response1 = client.read(Key { key: key1.to_string(), namespace: namespace1.to_string(), }).await.unwrap();
-        let read_response2 = client.read(Key { key: key2.to_string(), namespace: namespace2.to_string(), }).await.unwrap();
-        let read_response3 = client.read(Key { key: key3.to_string(), namespace: namespace3.to_string(), }).await.unwrap();
-        let read_response4 = client.read(Key { key: key4.to_string(), namespace: namespace4.to_string(), }).await.unwrap();
-        let read_response5 = client.read(Key { key: key5.to_string(), namespace: namespace5.to_string(), }).await.unwrap();
+        let read_response1 = client
+            .read(Key {
+                key: key1.to_string(),
+                namespace: namespace1.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_response2 = client
+            .read(Key {
+                key: key2.to_string(),
+                namespace: namespace2.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_response3 = client
+            .read(Key {
+                key: key3.to_string(),
+                namespace: namespace3.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_response4 = client
+            .read(Key {
+                key: key4.to_string(),
+                namespace: namespace4.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_response5 = client
+            .read(Key {
+                key: key5.to_string(),
+                namespace: namespace5.to_string(),
+            })
+            .await
+            .unwrap();
 
         // Assert
-        assert!(delete_recursively_response.into_inner().success
-                    && !read_response1.into_inner().success 
-                    && !read_response2.into_inner().success 
-                    && !read_response3.into_inner().success 
-                    && !read_response4.into_inner().success
-                    && read_response5.into_inner().success);
+        assert!(
+            delete_recursively_response.into_inner().success
+                && !read_response1.into_inner().success
+                && !read_response2.into_inner().success
+                && !read_response3.into_inner().success
+                && !read_response4.into_inner().success
+                && read_response5.into_inner().success
+        );
 
         // Clean up.
         client.destroy_db(DestroyArguments {}).await.unwrap();
@@ -921,14 +995,23 @@ mod tests {
         let key1 = "Vehicle.Infotainment";
         let value1 = "test";
         let namespace1 = "";
-        let key_value1 = KeyValue { key: key1.to_string(), value: value1.to_string(), namespace: namespace1.to_string(), };
+        let key_value1 = KeyValue {
+            key: key1.to_string(),
+            value: value1.to_string(),
+            namespace: namespace1.to_string(),
+        };
         let response1 = client.write(key_value1).await.unwrap();
         assert!(response1.into_inner().success);
 
         let key2 = "Vehicle.Infotainment.Radio.CurrentStation";
         let value2 = "WDR 4";
         let namespace2 = "";
-        let key_value2 = KeyValue { key: key2.to_string(), value: value2.to_string(), namespace: namespace2.to_string(), };
+
+        let key_value2 = KeyValue {
+            key: key2.to_string(),
+            value: value2.to_string(),
+            namespace: namespace2.to_string(),
+        };
 
         let response2 = client.write(key_value2).await.unwrap();
         assert!(response2.into_inner().success);
@@ -936,51 +1019,111 @@ mod tests {
         let key3 = "Vehicle.Infotainment.Radio.Volume";
         let value3 = "99%";
         let namespace3 = "";
-        let key_value3 = KeyValue { key: key3.to_string(), value: value3.to_string(), namespace: namespace3.to_string(), };
+        let key_value3 = KeyValue {
+            key: key3.to_string(),
+            value: value3.to_string(),
+            namespace: namespace3.to_string(),
+        };
         let response3 = client.write(key_value3).await.unwrap();
         assert!(response3.into_inner().success);
 
         let key4 = "Vehicle.Infotainment.HVAC.OutdoorTemperature";
         let value4 = "34 °C";
         let namespace4 = "";
-        let key_value4 = KeyValue { key: key4.to_string(), value: value4.to_string(), namespace: namespace4.to_string(), };
+        let key_value4 = KeyValue {
+            key: key4.to_string(),
+            value: value4.to_string(),
+            namespace: namespace4.to_string(),
+        };
         let response4 = client.write(key_value4).await.unwrap();
         assert!(response4.into_inner().success);
 
         let key5 = "Vehicle.Communication.Radio.Volume";
         let value5 = "80%";
         let namespace5 = "";
-        let key_value5 = KeyValue { key: key5.to_string(), value: value5.to_string(), namespace: namespace5.to_string(), };
+        let key_value5 = KeyValue {
+            key: key5.to_string(),
+            value: value5.to_string(),
+            namespace: namespace5.to_string(),
+        };
         let response5 = client.write(key_value5).await.unwrap();
         assert!(response5.into_inner().success);
 
         let key6 = "Private.Info";
         let value6 = "test";
         let namespace6 = "AppName";
-        let key_value6 = KeyValue { key: key6.to_string(), value: value6.to_string(), namespace: namespace6.to_string(), };
+        let key_value6 = KeyValue {
+            key: key6.to_string(),
+            value: value6.to_string(),
+            namespace: namespace6.to_string(),
+        };
         let response6 = client.write(key_value6).await.unwrap();
         assert!(response6.into_inner().success);
 
         // Act
         let deletion_node = "Vehicle";
         let deletion_namespace = "";
-        let delete_recursively_response = client.delete_recursively_from(Key { key: deletion_node.to_string(), namespace: deletion_namespace.to_string(), }).await.unwrap();
+        let delete_recursively_response = client
+            .delete_recursively_from(Key {
+                key: deletion_node.to_string(),
+                namespace: deletion_namespace.to_string(),
+            })
+            .await
+            .unwrap();
 
-        let read_response1 = client.read(Key { key: key1.to_string(), namespace: namespace1.to_string(), }).await.unwrap();
-        let read_response2 = client.read(Key { key: key2.to_string(), namespace: namespace2.to_string(), }).await.unwrap();
-        let read_response3 = client.read(Key { key: key3.to_string(), namespace: namespace3.to_string(), }).await.unwrap();
-        let read_response4 = client.read(Key { key: key4.to_string(), namespace: namespace4.to_string(), }).await.unwrap();
-        let read_response5 = client.read(Key { key: key5.to_string(), namespace: namespace5.to_string(), }).await.unwrap();
-        let read_response6 = client.read(Key { key: key6.to_string(), namespace: namespace6.to_string(), }).await.unwrap();
+        let read_response1 = client
+            .read(Key {
+                key: key1.to_string(),
+                namespace: namespace1.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_response2 = client
+            .read(Key {
+                key: key2.to_string(),
+                namespace: namespace2.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_response3 = client
+            .read(Key {
+                key: key3.to_string(),
+                namespace: namespace3.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_response4 = client
+            .read(Key {
+                key: key4.to_string(),
+                namespace: namespace4.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_response5 = client
+            .read(Key {
+                key: key5.to_string(),
+                namespace: namespace5.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_response6 = client
+            .read(Key {
+                key: key6.to_string(),
+                namespace: namespace6.to_string(),
+            })
+            .await
+            .unwrap();
 
         // Assert
-        assert!(delete_recursively_response.into_inner().success
-                    && !read_response1.into_inner().success 
-                    && !read_response2.into_inner().success 
-                    && !read_response3.into_inner().success 
-                    && !read_response4.into_inner().success
-                    && !read_response5.into_inner().success
-                    && read_response6.into_inner().success);
+        assert!(
+            delete_recursively_response.into_inner().success
+                && !read_response1.into_inner().success
+                && !read_response2.into_inner().success
+                && !read_response3.into_inner().success
+                && !read_response4.into_inner().success
+                && !read_response5.into_inner().success
+                && read_response6.into_inner().success
+        );
 
         // Clean up.
         client.destroy_db(DestroyArguments {}).await.unwrap();
@@ -1010,7 +1153,11 @@ mod tests {
         let key1 = "Vehicle.Infotainment";
         let value1 = "test";
         let namespace1 = "";
-        let key_value1 = KeyValue { key: key1.to_string(), value: value1.to_string(), namespace: namespace1.to_string(), };
+        let key_value1 = KeyValue {
+            key: key1.to_string(),
+            value: value1.to_string(),
+            namespace: namespace1.to_string(),
+        };
 
         let response1 = client.write(key_value1).await.unwrap();
         assert!(response1.into_inner().success);
@@ -1018,7 +1165,11 @@ mod tests {
         let key2 = "Vehicle.Infotainment.Radio.CurrentStation";
         let value2 = "WDR 4";
         let namespace2 = "";
-        let key_value2 = KeyValue { key: key2.to_string(), value: value2.to_string(), namespace: namespace2.to_string(), };
+        let key_value2 = KeyValue {
+            key: key2.to_string(),
+            value: value2.to_string(),
+            namespace: namespace2.to_string(),
+        };
 
         let response2 = client.write(key_value2).await.unwrap();
         assert!(response2.into_inner().success);
@@ -1026,24 +1177,54 @@ mod tests {
         let key3 = "Private.Info";
         let value3 = "test";
         let namespace3 = "AppName";
-        let key_value3 = KeyValue { key: key3.to_string(), value: value3.to_string(), namespace: namespace3.to_string(), };
+        let key_value3 = KeyValue {
+            key: key3.to_string(),
+            value: value3.to_string(),
+            namespace: namespace3.to_string(),
+        };
         let response3 = client.write(key_value3).await.unwrap();
         assert!(response3.into_inner().success);
 
         // Act
         let deletion_node = "";
         let deletion_namespace = "";
-        let delete_recursively_response = client.delete_recursively_from(Key { key: deletion_node.to_string(), namespace: deletion_namespace.to_string(), }).await.unwrap();
+        let delete_recursively_response = client
+            .delete_recursively_from(Key {
+                key: deletion_node.to_string(),
+                namespace: deletion_namespace.to_string(),
+            })
+            .await
+            .unwrap();
 
-        let read_response1 = client.read(Key { key: key1.to_string(), namespace: namespace1.to_string(), }).await.unwrap();
-        let read_response2 = client.read(Key { key: key2.to_string(), namespace: namespace2.to_string(), }).await.unwrap();
-        let read_response3 = client.read(Key { key: key3.to_string(), namespace: namespace3.to_string(), }).await.unwrap();
+        let read_response1 = client
+            .read(Key {
+                key: key1.to_string(),
+                namespace: namespace1.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_response2 = client
+            .read(Key {
+                key: key2.to_string(),
+                namespace: namespace2.to_string(),
+            })
+            .await
+            .unwrap();
+        let read_response3 = client
+            .read(Key {
+                key: key3.to_string(),
+                namespace: namespace3.to_string(),
+            })
+            .await
+            .unwrap();
 
         // Assert
-        assert!(!delete_recursively_response.into_inner().success
-                    && read_response1.into_inner().success 
-                    && read_response2.into_inner().success
-                    && read_response3.into_inner().success);
+        assert!(
+            !delete_recursively_response.into_inner().success
+                && read_response1.into_inner().success
+                && read_response2.into_inner().success
+                && read_response3.into_inner().success
+        );
 
         // Clean up.
         client.destroy_db(DestroyArguments {}).await.unwrap();

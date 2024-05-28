@@ -88,7 +88,13 @@ impl DbService {
             Ok(()) => {
                 return (
                     true,
-                    String::from("Wrote key '") + key + "' and value '" + value + "' in namespace '" + namespace + "'",
+                    String::from("Wrote key '")
+                        + key
+                        + "' and value '"
+                        + value
+                        + "' in namespace '"
+                        + namespace
+                        + "'",
                 )
             }
             Err(e) => {
@@ -117,7 +123,13 @@ impl DbService {
             Ok(value) => {
                 return (
                     true,
-                    String::from("Retrieved value '") + &value + "' from key '" + key + "' in namespace '" + namespace + "'",
+                    String::from("Retrieved value '")
+                        + &value
+                        + "' from key '"
+                        + key
+                        + "' in namespace '"
+                        + namespace
+                        + "'",
                     value,
                 )
             }
@@ -153,7 +165,12 @@ impl DbService {
         if self.check_if_key_exists(key, namespace) {
             let namespace_key = format!("{namespace}_.{key}");
             match self.rocks_db_facade.delete_db(&namespace_key.as_str()) {
-                Ok(()) => return (true, String::from("Deleted key '") + key + "' in namespace '" + namespace + "'"),
+                Ok(()) => {
+                    return (
+                        true,
+                        String::from("Deleted key '") + key + "' in namespace '" + namespace + "'",
+                    )
+                }
                 Err(e) => {
                     return (
                         false,
@@ -167,7 +184,10 @@ impl DbService {
                 }
             }
         } else {
-            return (false, String::from("Key '") + key + "' does not exist in namespace '" + namespace + "'!");
+            return (
+                false,
+                String::from("Key '") + key + "' does not exist in namespace '" + namespace + "'!",
+            );
         }
     }
 
@@ -177,7 +197,10 @@ impl DbService {
             return (false, msg, Vec::new());
         }
         let namespace_prefix = format!("{namespace}_.");
-        match self.rocks_db_facade.list_keys_with_prefix(namespace_prefix.as_str()) {
+        match self
+            .rocks_db_facade
+            .list_keys_with_prefix(namespace_prefix.as_str())
+        {
             Ok(value) => {
 
                 //let namespace_prefix = format!("{namespace}_.");
@@ -199,7 +222,7 @@ impl DbService {
                         }
                     }
                 }*/
-                
+
                 /*for string in &res {
                     //string = string.replace(string, "");
                     string = string.strip_prefix(namespace_prefix.as_str()).to_string();
@@ -209,7 +232,11 @@ impl DbService {
                 //res = res.into_iter().map(|string| string.strip_prefix("_.")).collect();
                 return (
                     true,
-                    String::from("Retrieved list of keys containing substring '") + substring + "' in namespace '" + namespace + "'",
+                    String::from("Retrieved list of keys containing substring '")
+                        + substring
+                        + "' in namespace '"
+                        + namespace
+                        + "'",
                     res,
                 );
             } //s.retain(|c| !r#"(),".;:'"#.contains(c));
@@ -241,20 +268,34 @@ impl DbService {
         let mut deleted_keys = "Deleted Keys: ".to_string();
 
         let namespace_node = format!("{namespace}_.{node}");
-        match self.rocks_db_facade.list_keys_with_prefix(namespace_node.as_str()){
+        match self
+            .rocks_db_facade
+            .list_keys_with_prefix(namespace_node.as_str())
+        {
             Ok(res) => {
                 for key in res {
                     let namespace_key = format!("{namespace}_.{key}");
                     match self.rocks_db_facade.delete_db(&namespace_key.as_str()) {
                         Ok(()) => deleted_keys = format!("{} {}", deleted_keys, key),
                         Err(_e) => {
-                            return (false, "Error deleting key '".to_string() + &key + "'.")
+                            return (
+                                false,
+                                "Error deleting key '".to_string()
+                                    + &key
+                                    + "' in namespace '"
+                                    + namespace
+                                    + "'.",
+                            )
                         }
                     }
                 }
                 return (
                     true,
-                    "Successfully deleted nodes: ".to_string() + &deleted_keys + ".",
+                    "Successfully deleted keys: ".to_string()
+                        + &deleted_keys
+                        + " in namespace '"
+                        + namespace
+                        + "'.",
                 );
             }
             Err(_e) => (
