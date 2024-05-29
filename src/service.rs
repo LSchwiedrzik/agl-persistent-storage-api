@@ -72,6 +72,16 @@ impl DbService {
         if !is_open {
             return (false, msg);
         }
+        if key.is_empty() {
+            return (
+                false,
+                String::from("Error when trying to write key '")
+                    + key
+                    + "' and value '"
+                    + value
+                    + "': Key cannot be empty string.",
+            );
+        }
         match self.rocks_db_facade.write_db(key, value) {
             Ok(()) => {
                 return (

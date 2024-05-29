@@ -196,8 +196,8 @@ mod tests {
         };
 
         // Act
-        let response = client.write(key_value).await.unwrap();
-        let _read_value = client
+        let response_write = client.write(key_value).await.unwrap();
+        let response_read = client
             .read(Key {
                 key: key.to_string(),
             })
@@ -205,7 +205,8 @@ mod tests {
             .unwrap();
 
         // Assert
-        assert!(!response.into_inner().success);
+        assert!(!response_write.into_inner().success);
+        assert!(!response_read.into_inner().success);
 
         // Clean up.
         let _response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
