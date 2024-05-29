@@ -212,7 +212,7 @@ impl DbService {
                             .to_owned()
                     })
                     .collect::<Vec<String>>();
-                
+
                 res.sort();
                 return (
                     true,
@@ -257,10 +257,16 @@ impl DbService {
             .list_keys_with_prefix(namespace_node.as_str())
         {
             Ok(res) => {
-                for key in res {
-                    let namespace_key = format!("{namespace}_.{key}");
-                    match self.rocks_db_facade.delete_db(&namespace_key.as_str()) {
-                        Ok(()) => deleted_keys = format!("{} {}", deleted_keys, key),
+                for mut key in res {
+                    match self.rocks_db_facade.delete_db(&key.as_str()) {
+                        Ok(()) => {
+                            let namespace_prefix = format!("{namespace}_.");
+                            key = key
+                                .strip_prefix(namespace_prefix.as_str())
+                                .expect("nothing left after stripping prefix")
+                                .to_owned();
+                            deleted_keys = format!("{} {}", deleted_keys, key);
+                        }
                         Err(_e) => {
                             return (
                                 false,
@@ -293,6 +299,7 @@ impl DbService {
         &mut self,
         node: &str,
         layers: Option<i32>,
+        namespace: &str,
     ) -> (bool, String, Vec<String>) {
         let l = layers.unwrap_or(1);
         if l < 0 {
@@ -314,10 +321,15 @@ impl DbService {
         if !node.is_empty() {
             node_dot.push('.');
         }
-        match self.rocks_db_facade.list_keys_with_prefix(&node_dot) {
+        let namespace_node_dot = format!("{namespace}_.{node_dot}");
+        let namespace_prefix = format!("{namespace}_.");
+        match self
+            .rocks_db_facade
+            .list_keys_with_prefix(&namespace_node_dot)
+        {
             Ok(mut value) => {
                 if l == 0 {
-                    if self.check_if_key_exists(node) {
+                    if self.check_if_key_exists(node, namespace) {
                         value.push(String::from(node));
                     }
                     if value.is_empty() && !node.is_empty() {
@@ -333,6 +345,15 @@ impl DbService {
                             Vec::new(),
                         );
                     }
+                    value = value
+                        .into_iter()
+                        .map(|string| {
+                            string
+                                .strip_prefix(namespace_prefix.as_str())
+                                .expect("nothing left after stripping prefix")
+                                .to_owned()
+                        })
+                        .collect::<Vec<String>>();
                     value.sort();
                     return (
                         true,
@@ -342,7 +363,10 @@ impl DbService {
                         value,
                     );
                 } else {
-                    if value.is_empty() && !node.is_empty() && !self.check_if_key_exists(node) {
+                    if value.is_empty()
+                        && !node.is_empty()
+                        && !self.check_if_key_exists(node, namespace)
+                    {
                         return (
                             false,
                             String::from("Error when trying to list nodes starting in '")
@@ -356,7 +380,7 @@ impl DbService {
                         );
                     }
                     let total_depth: i32 =
-                        node_dot.chars().filter(|&c| c == '.').count() as i32 - 1 + l;
+                        namespace_node_dot.chars().filter(|&c| c == '.').count() as i32 - 1 + l;
                     let mut res: Vec<String> = Vec::new();
                     for key in value.iter_mut() {
                         let mut count = 0;
@@ -373,6 +397,15 @@ impl DbService {
                             res.push(key.to_string());
                         }
                     }
+                    res = res
+                        .into_iter()
+                        .map(|string| {
+                            string
+                                .strip_prefix(namespace_prefix.as_str())
+                                .expect("nothing left after stripping prefix")
+                                .to_owned()
+                        })
+                        .collect::<Vec<String>>();
                     res.sort();
                     res.dedup();
                     return (

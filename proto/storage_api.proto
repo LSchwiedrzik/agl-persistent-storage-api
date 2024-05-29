@@ -43,6 +43,7 @@ message KeyValue {
 message SubtreeInfo {
     string node = 1;
     optional int32 layers = 2;
+    string namespace = 3;
 }
 
 message DestroyArguments {}

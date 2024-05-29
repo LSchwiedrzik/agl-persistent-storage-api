@@ -119,11 +119,11 @@ impl Database for DatabaseManager {
         request: Request<SubtreeInfo>,
     ) -> Result<Response<ListResponse>, Status> {
         let stinfo: SubtreeInfo = request.into_inner();
-        let res: (bool, String, Vec<String>) = self
-            .db_service
-            .lock()
-            .await
-            .nodes_starting_in(&stinfo.node, stinfo.layers);
+        let res: (bool, String, Vec<String>) = self.db_service.lock().await.nodes_starting_in(
+            &stinfo.node,
+            stinfo.layers,
+            &stinfo.namespace,
+        );
 
         Ok(Response::new(ListResponse {
             success: res.0,
@@ -160,6 +160,9 @@ mod tests {
         let end_addr = "http://127.0.0.1:9001";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
 
         let key = "Vehicle.Infotainment.Radio.CurrentStation";
         let value = "1live";
@@ -204,11 +207,16 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         let key = "";
         let value = "test";
+        let namespace = "";
         let key_value = KeyValue {
             key: key.to_string(),
             value: value.to_string(),
+            namespace: namespace.to_string(),
         };
 
         // Act
@@ -216,6 +224,7 @@ mod tests {
         let response_read = client
             .read(Key {
                 key: key.to_string(),
+                namespace: namespace.to_string(),
             })
             .await
             .unwrap();
@@ -246,6 +255,9 @@ mod tests {
         let end_addr = "http://127.0.0.1:9001";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
 
         let key1 = "Vehicle";
         let value1 = "car";
@@ -315,6 +327,9 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         let key1 = "Vehicle.Infotainment.Radio.CurrentStation";
         let value1 = "1live";
         let namespace1 = "";
@@ -381,6 +396,9 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         let key = "Private.Info";
         let value = "test";
         let namespace = "AppName";
@@ -425,6 +443,9 @@ mod tests {
         let end_addr = "http://127.0.0.1:9001";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
 
         let key = "Vehicle.Infotainment.Radio.CurrentStation";
         let value = "1live";
@@ -480,6 +501,9 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         let key = "Key.doesNotExist";
         let namespace = "";
 
@@ -522,6 +546,9 @@ mod tests {
         let end_addr = "http://127.0.0.1:9001";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
 
         let key = "Private.Info";
         let value = "test";
@@ -629,6 +656,9 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         let key1 = "Vehicle.Infotainment.Radio.CurrentStation";
         let key2 = "Vehicle.Communication.Radio.Volume";
         fill_db_for_search_tests(&mut client, key1, key2).await;
@@ -671,6 +701,9 @@ mod tests {
         let end_addr = "http://127.0.0.1:9001";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
 
         let key1 = "Vehicle.Infotainment.Radio.CurrentStation";
         let key2 = "Vehicle.Communication.Radio.Volume";
@@ -715,6 +748,9 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         let key1 = "Vehicle.Infotainment.Radio.CurrentStation";
         let key2 = "Vehicle.Communication.Radio.Volume";
         fill_db_for_search_tests(&mut client, key1, key2).await;
@@ -757,6 +793,9 @@ mod tests {
         let end_addr = "http://127.0.0.1:9001";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
 
         let key1 = "Vehicle.Infotainment.Radio.CurrentStation";
         let key2 = "Vehicle.Communication.Radio.Volume";
@@ -849,6 +888,9 @@ mod tests {
         let end_addr = "http://127.0.0.1:9001";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
 
         // fill db
         let key1 = "Vehicle.Infotainment";
@@ -990,6 +1032,9 @@ mod tests {
         let end_addr = "http://127.0.0.1:9001";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
 
         // fill db
         let key1 = "Vehicle.Infotainment";
@@ -1149,6 +1194,9 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         // fill db
         let key1 = "Vehicle.Infotainment";
         let value1 = "test";
@@ -1281,6 +1329,14 @@ mod tests {
         };
         let response6 = client.write(kv6).await.unwrap();
         assert!(response6.into_inner().success);
+
+        let kv7 = KeyValue {
+            key: "Private.Info".to_string(),
+            value: "test".to_string(),
+            namespace: "AppName".to_string(),
+        };
+        let response7 = client.write(kv7).await.unwrap();
+        assert!(response7.into_inner().success);
     }
 
     #[tokio::test]
@@ -1301,15 +1357,20 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         fill_db_example_tree(&mut client).await;
 
         // Act
         let node = "Vehicle.Infotainment";
         let layers = 1;
+        let namespace = "";
         let response = client
             .nodes_starting_in(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
+                namespace: namespace.to_string(),
             })
             .await
             .unwrap()
@@ -1345,14 +1406,19 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         fill_db_example_tree(&mut client).await;
 
         // Act
         let node = "Vehicle.Infotainment";
+        let namespace = "";
         let response = client
             .nodes_starting_in(SubtreeInfo {
                 node: node.to_string(),
                 layers: None,
+                namespace: namespace.to_string(),
             })
             .await
             .unwrap()
@@ -1388,15 +1454,20 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         fill_db_example_tree(&mut client).await;
 
         // Act
         let node = "Vehicle.Infotainment";
         let layers = 2;
+        let namespace = "";
         let response = client
             .nodes_starting_in(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
+                namespace: namespace.to_string(),
             })
             .await
             .unwrap()
@@ -1436,15 +1507,20 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         fill_db_example_tree(&mut client).await;
 
         // Act
         let node = "Vehicle";
         let layers = 0;
+        let namespace = "";
         let response = client
             .nodes_starting_in(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
+                namespace: namespace.to_string(),
             })
             .await
             .unwrap()
@@ -1486,15 +1562,20 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         fill_db_example_tree(&mut client).await;
 
         // Act
         let node = "";
         let layers = 0;
+        let namespace = "";
         let response = client
             .nodes_starting_in(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
+                namespace: namespace.to_string(),
             })
             .await
             .unwrap()
@@ -1537,15 +1618,20 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         fill_db_example_tree(&mut client).await;
 
         // Act
         let node = "";
         let layers = 1;
+        let namespace = "";
         let response = client
             .nodes_starting_in(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
+                namespace: namespace.to_string(),
             })
             .await
             .unwrap()
@@ -1578,15 +1664,20 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         fill_db_example_tree(&mut client).await;
 
         // Act
         let node = "Vehicle.Infotainment.Radio.Volume";
         let layers = 1;
+        let namespace = "";
         let response = client
             .nodes_starting_in(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
+                namespace: namespace.to_string(),
             })
             .await
             .unwrap()
@@ -1619,15 +1710,20 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         fill_db_example_tree(&mut client).await;
 
         // Act
         let node = "Vehicle";
         let layers = -1;
+        let namespace = "";
         let response = client
             .nodes_starting_in(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
+                namespace: namespace.to_string(),
             })
             .await
             .unwrap()
@@ -1659,15 +1755,20 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         fill_db_example_tree(&mut client).await;
 
         // Act
         let node = "Vehicle.DoesNotExist";
         let layers = 1;
+        let namespace = "";
         let response = client
             .nodes_starting_in(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
+                namespace: namespace.to_string(),
             })
             .await
             .unwrap()
@@ -1699,13 +1800,18 @@ mod tests {
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
         // Act
         let node = "";
         let layers = 1;
+        let namespace = "";
         let response = client
             .nodes_starting_in(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
+                namespace: namespace.to_string(),
             })
             .await
             .unwrap()
@@ -1714,6 +1820,50 @@ mod tests {
         // Assert
         assert!(response.success);
         assert_eq!(response.result, vec![] as Vec<String>);
+
+        // Clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+        server_task.abort();
+    }
+
+    #[tokio::test]
+    #[serial]
+    async fn test_list_nodes_nondefault_namespace() {
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        let end_addr = "http://127.0.0.1:9001";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
+        fill_db_example_tree(&mut client).await;
+
+        // Act
+        let node = "Private";
+        let layers = 1;
+        let namespace = "AppName";
+        let response = client
+            .nodes_starting_in(SubtreeInfo {
+                node: node.to_string(),
+                layers: Some(layers),
+                namespace: namespace.to_string(),
+            })
+            .await
+            .unwrap()
+            .into_inner();
+
+        // Assert
+        assert!(response.success);
+        assert_eq!(response.result, vec!["Private.Info"]);
 
         // Clean up.
         client.destroy_db(DestroyArguments {}).await.unwrap();

@@ -29,6 +29,8 @@ pub struct SubtreeInfo {
     pub node: ::prost::alloc::string::String,
     #[prost(int32, optional, tag = "2")]
     pub layers: ::core::option::Option<i32>,
+    #[prost(string, tag = "3")]
+    pub namespace: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -225,19 +227,15 @@ pub mod database_client {
             &mut self,
             request: impl tonic::IntoRequest<super::SubtreeInfo>,
         ) -> Result<tonic::Response<super::ListResponse>, tonic::Status> {
-            self.inner
-                .ready()
-                .await
-                .map_err(|e| {
-                    tonic::Status::new(
-                        tonic::Code::Unknown,
-                        format!("Service was not ready: {}", e.into()),
-                    )
-                })?;
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/storage_api.Database/NodesStartingIn",
-            );
+            let path =
+                http::uri::PathAndQuery::from_static("/storage_api.Database/NodesStartingIn");
             self.inner.unary(request.into_request(), path, codec).await
         }
     }
@@ -513,32 +511,18 @@ pub mod database_server {
                     };
                     Box::pin(fut)
                 }
-                _ => Box::pin(async move {
-                    Ok(http::Response::builder()
-                        .status(200)
-                        .header("grpc-status", "12")
-                        .header("content-type", "application/grpc")
-                        .body(empty_body())
-                        .unwrap())
-                }),
                 "/storage_api.Database/NodesStartingIn" => {
                     #[allow(non_camel_case_types)]
                     struct NodesStartingInSvc<T: Database>(pub Arc<T>);
-                    impl<T: Database> tonic::server::UnaryService<super::SubtreeInfo>
-                    for NodesStartingInSvc<T> {
+                    impl<T: Database> tonic::server::UnaryService<super::SubtreeInfo> for NodesStartingInSvc<T> {
                         type Response = super::ListResponse;
-                        type Future = BoxFuture<
-                            tonic::Response<Self::Response>,
-                            tonic::Status,
-                        >;
+                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
                             &mut self,
                             request: tonic::Request<super::SubtreeInfo>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move {
-                                (*inner).nodes_starting_in(request).await
-                            };
+                            let fut = async move { (*inner).nodes_starting_in(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -549,28 +533,23 @@ pub mod database_server {
                         let inner = inner.0;
                         let method = NodesStartingInSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec)
-                            .apply_compression_config(
-                                accept_compression_encodings,
-                                send_compression_encodings,
-                            );
+                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
+                            accept_compression_encodings,
+                            send_compression_encodings,
+                        );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)
                 }
-                _ => {
-                    Box::pin(async move {
-                        Ok(
-                            http::Response::builder()
-                                .status(200)
-                                .header("grpc-status", "12")
-                                .header("content-type", "application/grpc")
-                                .body(empty_body())
-                                .unwrap(),
-                        )
-                    })
-                }
+                _ => Box::pin(async move {
+                    Ok(http::Response::builder()
+                        .status(200)
+                        .header("grpc-status", "12")
+                        .header("content-type", "application/grpc")
+                        .body(empty_body())
+                        .unwrap())
+                }),
             }
         }
     }
