@@ -32,9 +32,3 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
     Ok(())
 }
-
-#[cfg(test)]
-// Unit tests go here
-mod tests {
-
-}
