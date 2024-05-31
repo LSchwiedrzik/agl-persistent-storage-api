@@ -3,6 +3,8 @@
 pub struct Key {
     #[prost(string, tag = "1")]
     pub key: ::prost::alloc::string::String,
+    #[prost(string, tag = "2")]
+    pub namespace: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -17,6 +19,8 @@ pub struct KeyValue {
     pub key: ::prost::alloc::string::String,
     #[prost(string, tag = "2")]
     pub value: ::prost::alloc::string::String,
+    #[prost(string, tag = "3")]
+    pub namespace: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]
@@ -25,6 +29,8 @@ pub struct SubtreeInfo {
     pub node: ::prost::alloc::string::String,
     #[prost(int32, optional, tag = "2")]
     pub layers: ::core::option::Option<i32>,
+    #[prost(string, tag = "3")]
+    pub namespace: ::prost::alloc::string::String,
 }
 #[allow(clippy::derive_partial_eq_without_eq)]
 #[derive(Clone, PartialEq, ::prost::Message)]

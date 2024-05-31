@@ -1,6 +1,6 @@
 use crate::facade::RocksDbFacade;
 
-const DB_PATH: &str = "testpath";
+const DB_PATH: &str = "rocksdb";
 
 #[derive(Debug)]
 pub struct DbService {
@@ -67,7 +67,7 @@ impl DbService {
         }
     }
 
-    pub fn write_db(&mut self, key: &str, value: &str) -> (bool, String) {
+    pub fn write_db(&mut self, key: &str, value: &str, namespace: &str) -> (bool, String) {
         let (is_open, msg) = self.open_db();
         if !is_open {
             return (false, msg);
@@ -82,11 +82,19 @@ impl DbService {
                     + "': Key cannot be empty string.",
             );
         }
-        match self.rocks_db_facade.write_db(key, value) {
+
+        let namespace_key = format!("{namespace}_.{key}");
+        match self.rocks_db_facade.write_db(namespace_key.as_str(), value) {
             Ok(()) => {
                 return (
                     true,
-                    String::from("Wrote key '") + key + "' and value '" + value + "'",
+                    String::from("Wrote key '")
+                        + key
+                        + "' and value '"
+                        + value
+                        + "' in namespace '"
+                        + namespace
+                        + "'",
                 )
             }
             Err(e) => {
@@ -96,6 +104,8 @@ impl DbService {
                         + key
                         + "' and value '"
                         + value
+                        + "' in namespace '"
+                        + namespace
                         + "': "
                         + &e.to_string(),
                 )
@@ -103,16 +113,23 @@ impl DbService {
         }
     }
 
-    pub fn read_db(&mut self, key: &str) -> (bool, String, String) {
+    pub fn read_db(&mut self, key: &str, namespace: &str) -> (bool, String, String) {
         let (is_open, msg) = self.open_db();
         if !is_open {
             return (false, msg, String::from(""));
         }
-        match self.rocks_db_facade.read_db(key) {
+        let namespace_key = format!("{namespace}_.{key}");
+        match self.rocks_db_facade.read_db(namespace_key.as_str()) {
             Ok(value) => {
                 return (
                     true,
-                    String::from("Retrieved value '") + &value + "' from key '" + key + "'",
+                    String::from("Retrieved value '")
+                        + &value
+                        + "' from key '"
+                        + key
+                        + "' in namespace '"
+                        + namespace
+                        + "'",
                     value,
                 )
             }
@@ -121,6 +138,8 @@ impl DbService {
                     false,
                     String::from("Error when trying to retrieve from key '")
                         + key
+                        + "' in namespace '"
+                        + namespace
                         + "': "
                         + &e.to_string(),
                     String::from(""),
@@ -129,52 +148,79 @@ impl DbService {
         }
     }
 
-    pub fn check_if_key_exists(&mut self, key: &str) -> bool {
-        match self.rocks_db_facade.read_db(key) {
+    pub fn check_if_key_exists(&mut self, key: &str, namespace: &str) -> bool {
+        let namespace_key = format!("{namespace}_.{key}");
+        match self.rocks_db_facade.read_db(namespace_key.as_str()) {
             Ok(_value) => return true,
             Err(_e) => return false,
         }
     }
 
-    pub fn delete_db(&mut self, key: &str) -> (bool, String) {
+    pub fn delete_db(&mut self, key: &str, namespace: &str) -> (bool, String) {
         let (is_open, msg) = self.open_db();
         if !is_open {
             return (false, msg);
         }
 
-        if self.check_if_key_exists(key) {
-            match self.rocks_db_facade.delete_db(key) {
-                Ok(()) => return (true, String::from("Deleted key '") + key + "'"),
+        if self.check_if_key_exists(key, namespace) {
+            let namespace_key = format!("{namespace}_.{key}");
+            match self.rocks_db_facade.delete_db(&namespace_key.as_str()) {
+                Ok(()) => {
+                    return (
+                        true,
+                        String::from("Deleted key '") + key + "' in namespace '" + namespace + "'",
+                    )
+                }
                 Err(e) => {
                     return (
                         false,
                         String::from("Error when trying to delete key '")
                             + key
+                            + "' in namespace '"
+                            + namespace
                             + "': "
                             + &e.to_string(),
                     )
                 }
             }
         } else {
-            return (false, String::from("Key '") + key + "' does not exist!");
+            return (
+                false,
+                String::from("Key '") + key + "' does not exist in namespace '" + namespace + "'!",
+            );
         }
     }
 
-    pub fn search_db(&mut self, substring: &str) -> (bool, String, Vec<String>) {
+    pub fn search_db(&mut self, substring: &str, namespace: &str) -> (bool, String, Vec<String>) {
         let (is_open, msg) = self.open_db();
         if !is_open {
             return (false, msg, Vec::new());
         }
-        match self.rocks_db_facade.list_all_keys() {
+        let namespace_prefix = format!("{namespace}_.");
+        match self
+            .rocks_db_facade
+            .list_keys_with_prefix(namespace_prefix.as_str())
+        {
             Ok(value) => {
-                let mut res: Vec<String> = value
+                let mut res = value
                     .into_iter()
                     .filter(|string| string.contains(substring))
-                    .collect();
+                    .map(|string| {
+                        string
+                            .strip_prefix(namespace_prefix.as_str())
+                            .expect("nothing left after stripping prefix")
+                            .to_owned()
+                    })
+                    .collect::<Vec<String>>();
+
                 res.sort();
                 return (
                     true,
-                    String::from("Retrieved list of keys containing substring '") + substring + "'",
+                    String::from("Retrieved list of keys containing substring '")
+                        + substring
+                        + "' in namespace '"
+                        + namespace
+                        + "'",
                     res,
                 );
             }
@@ -183,6 +229,8 @@ impl DbService {
                     false,
                     String::from("Error when trying to search for keys containing '")
                         + substring
+                        + "' in namespace '"
+                        + namespace
                         + "': "
                         + &e.to_string(),
                     Vec::new(),
@@ -191,7 +239,7 @@ impl DbService {
         }
     }
 
-    pub fn delete_recursively_from_db(&mut self, node: &str) -> (bool, String) {
+    pub fn delete_recursively_from_db(&mut self, node: &str, namespace: &str) -> (bool, String) {
         let (is_open, msg) = self.open_db();
         if !is_open {
             return (false, msg);
@@ -202,19 +250,42 @@ impl DbService {
         }
 
         let mut deleted_keys = "Deleted Keys: ".to_string();
-        match self.rocks_db_facade.list_keys_with_prefix(node) {
+
+        let namespace_node = format!("{namespace}_.{node}");
+        match self
+            .rocks_db_facade
+            .list_keys_with_prefix(namespace_node.as_str())
+        {
             Ok(res) => {
-                for key in res {
-                    match self.rocks_db_facade.delete_db(&key) {
-                        Ok(()) => deleted_keys = format!("{} {}", deleted_keys, key),
+                for mut key in res {
+                    match self.rocks_db_facade.delete_db(&key.as_str()) {
+                        Ok(()) => {
+                            let namespace_prefix = format!("{namespace}_.");
+                            key = key
+                                .strip_prefix(namespace_prefix.as_str())
+                                .expect("nothing left after stripping prefix")
+                                .to_owned();
+                            deleted_keys = format!("{} {}", deleted_keys, key);
+                        }
                         Err(_e) => {
-                            return (false, "Error deleting key '".to_string() + &key + "'.")
+                            return (
+                                false,
+                                "Error deleting key '".to_string()
+                                    + &key
+                                    + "' in namespace '"
+                                    + namespace
+                                    + "'.",
+                            )
                         }
                     }
                 }
                 return (
                     true,
-                    "Successfully deleted nodes: ".to_string() + &deleted_keys + ".",
+                    "Successfully deleted keys: ".to_string()
+                        + &deleted_keys
+                        + " in namespace '"
+                        + namespace
+                        + "'.",
                 );
             }
             Err(_e) => (
@@ -228,6 +299,7 @@ impl DbService {
         &mut self,
         node: &str,
         layers: Option<i32>,
+        namespace: &str,
     ) -> (bool, String, Vec<String>) {
         let l = layers.unwrap_or(1);
         if l < 0 {
@@ -249,10 +321,15 @@ impl DbService {
         if !node.is_empty() {
             node_dot.push('.');
         }
-        match self.rocks_db_facade.list_keys_with_prefix(&node_dot) {
+        let namespace_node_dot = format!("{namespace}_.{node_dot}");
+        let namespace_prefix = format!("{namespace}_.");
+        match self
+            .rocks_db_facade
+            .list_keys_with_prefix(&namespace_node_dot)
+        {
             Ok(mut value) => {
                 if l == 0 {
-                    if self.check_if_key_exists(node) {
+                    if self.check_if_key_exists(node, namespace) {
                         value.push(String::from(node));
                     }
                     if value.is_empty() && !node.is_empty() {
@@ -268,6 +345,15 @@ impl DbService {
                             Vec::new(),
                         );
                     }
+                    value = value
+                        .into_iter()
+                        .map(|string| {
+                            string
+                                .strip_prefix(namespace_prefix.as_str())
+                                .expect("nothing left after stripping prefix")
+                                .to_owned()
+                        })
+                        .collect::<Vec<String>>();
                     value.sort();
                     return (
                         true,
@@ -277,7 +363,10 @@ impl DbService {
                         value,
                     );
                 } else {
-                    if value.is_empty() && !node.is_empty() && !self.check_if_key_exists(node) {
+                    if value.is_empty()
+                        && !node.is_empty()
+                        && !self.check_if_key_exists(node, namespace)
+                    {
                         return (
                             false,
                             String::from("Error when trying to list nodes starting in '")
@@ -291,7 +380,7 @@ impl DbService {
                         );
                     }
                     let total_depth: i32 =
-                        node_dot.chars().filter(|&c| c == '.').count() as i32 - 1 + l;
+                        namespace_node_dot.chars().filter(|&c| c == '.').count() as i32 - 1 + l;
                     let mut res: Vec<String> = Vec::new();
                     for key in value.iter_mut() {
                         let mut count = 0;
@@ -308,6 +397,15 @@ impl DbService {
                             res.push(key.to_string());
                         }
                     }
+                    res = res
+                        .into_iter()
+                        .map(|string| {
+                            string
+                                .strip_prefix(namespace_prefix.as_str())
+                                .expect("nothing left after stripping prefix")
+                                .to_owned()
+                        })
+                        .collect::<Vec<String>>();
                     res.sort();
                     res.dedup();
                     return (
