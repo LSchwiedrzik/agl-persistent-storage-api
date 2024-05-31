@@ -52,6 +52,7 @@ architecture:
   - Consumer wants to save key+value (e.g.
     'Vehicle.Infotainment.Radio.CurrentStation':'hr5').
   - This overwrites existing value under key.
+  - The empty string cannot be used as a key.
 
     ```text
     Write('Vehicle.Infotainment.Radio.CurrentStation':'1live') -> Response
@@ -59,6 +60,8 @@ architecture:
     Write('Vehicle.Infotainment':'yes') -> Response
 
     Write('test':'1') -> Response
+
+    Write('':'test') -> Error
     ```
 
 - `Search(string) -> ListResponse(success: boolean, message: string, keys: repeated string)`
