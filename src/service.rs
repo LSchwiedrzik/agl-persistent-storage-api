@@ -251,12 +251,15 @@ impl DbService {
 
         let mut deleted_keys = "Deleted Keys: ".to_string();
 
-        let namespace_node = format!("{namespace}_.{node}");
+        let namespace_node = format!("{namespace}_.{node}.");
         match self
             .rocks_db_facade
             .list_keys_with_prefix(namespace_node.as_str())
         {
-            Ok(res) => {
+            Ok(mut res) => {
+                if self.check_if_key_exists(node, namespace) {
+                    res.push(format!("{namespace}_.{node}"));
+                }
                 for mut key in res {
                     match self.rocks_db_facade.delete_db(&key.as_str()) {
                         Ok(()) => {
@@ -330,7 +333,7 @@ impl DbService {
             Ok(mut value) => {
                 if l == 0 {
                     if self.check_if_key_exists(node, namespace) {
-                        value.push(String::from(node));
+                        value.push(format!("{namespace}_.{node}"));
                     }
                     if value.is_empty() && !node.is_empty() {
                         return (
