@@ -232,7 +232,7 @@ pub mod database_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        /// Deletes all keys in subtree of given root.
+        /// Deletes all keys in subtree of given root. Assumes that keys follow VSS-like tress structure.
         pub async fn delete_nodes(
             &mut self,
             request: impl tonic::IntoRequest<super::Key>,
@@ -252,7 +252,7 @@ pub mod database_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        /// Lists all nodes in subtree of given root and depth.
+        /// Lists all nodes in subtree of given root and depth. Assumes that keys follow VSS-like tress structure.
         pub async fn list_nodes(
             &mut self,
             request: impl tonic::IntoRequest<super::SubtreeInfo>,
@@ -306,12 +306,12 @@ pub mod database_server {
             &self,
             request: tonic::Request<super::Key>,
         ) -> Result<tonic::Response<super::ListResponse>, tonic::Status>;
-        /// Deletes all keys in subtree of given root.
+        /// Deletes all keys in subtree of given root. Assumes that keys follow VSS-like tress structure.
         async fn delete_nodes(
             &self,
             request: tonic::Request<super::Key>,
         ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status>;
-        /// Lists all nodes in subtree of given root and depth.
+        /// Lists all nodes in subtree of given root and depth. Assumes that keys follow VSS-like tress structure.
         async fn list_nodes(
             &self,
             request: tonic::Request<super::SubtreeInfo>,
