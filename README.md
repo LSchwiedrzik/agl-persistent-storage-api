@@ -1,8 +1,10 @@
 # Persistent Storage API for the Automotive Grade Linux demo
 
-Our goal is to develop a grpc API for AGL that serves as persistent storage API
-for the demo. The API will be written in Rust and make use of tonic for grpc
-functionality as well as RocksDB as a database backend. Use cases include
+Our goal is to develop a grpc API for [AGL](https://www.automotivelinux.org/) 
+that serves as persistent storage API for the demo. The API will be written 
+in Rust and make use of [tonic](https://crates.io/crates/tonic-build) for grpc
+functionality as well as [RocksDB](https://rocksdb.org/) as a database backend,
+using [rust-rocksdb](https://crates.io/crates/rust-rocksdb). Use cases include
 retaining settings over a system shutdown (e.g. audio, HVAC, profile data, Wifi
 settings, radio presets, metric vs imperial units).
 
@@ -25,109 +27,139 @@ architecture:
 
 ## API Specification
 
-- `Read(key: string) -> StandardResponse(success: boolean, message: string)`
+**Namespaces**
+The rpcs described below interact with keys belonging to specific namespaces. This feature enables applications to maintain private namespaces within the same database. Not specifying a namespace when calling the API will result in the default namespace "" being used. Alternatively, a specific namespace (e.g. "AppName") can be chosen. With the exception of DestroyDB, which acts on the entire database, all rpcs can only interact with one namespace at a time.
 
-  - Consumer wants value of existing key, e.g.
-    'Vehicle.Infotainment.Radio.CurrentStation':
+- `DestroyDB() -> StandardResponse(success: boolean, message: string)`
 
-    ```text
-    Read('Vehicle.Infotainment.Radio.CurrentStation') -> 'wdr 4'
-
-    Read('Vehicle.doesNotExist') -> ERROR
-    ```
-
-- `Delete(key: string) -> StandardResponse(success: boolean, message: string)`
-
-  - Consumer wants to delete an existing key+value, e.g.
-    'Vehicle.Infotainment.Radio.CurrentStation':
+  - Consumer wants to destroy the entire database.
 
     ```text
-    Delete('Vehicle.Infotainment.Radio.CurrentStation') -> Response
-
-    Delete('Vehicle.doesNotExist') -> ERROR
+    DestroyDB() -> //destroys entire database.
     ```
 
-- `Write(key: string, value: string) -> ReadResponse(success: boolean, message: string, value: string)`
+- `Write(key: string, value: string, namespace: string) -> StandardResponse(success: boolean, message: string)`
 
-  - Consumer wants to save key+value (e.g.
+  - Consumer wants to save *key* + *value* to a given *namespace* (default is ""), (e.g.
     'Vehicle.Infotainment.Radio.CurrentStation':'hr5').
-  - This overwrites existing value under key.
-  - The empty string cannot be used as a key.
+  - This overwrites existing *value* under *key*.
+  - An empty string cannot be used as a *key*.
 
     ```text
-    Write('Vehicle.Infotainment.Radio.CurrentStation':'1live') -> Response
+    Write('Vehicle.Infotainment.Radio.CurrentStation':'wdr 4') -> Response
 
     Write('Vehicle.Infotainment':'yes') -> Response
 
     Write('test':'1') -> Response
 
     Write('':'test') -> Error
+
+    Write(key: 'Private.Info', value: 'test', namespace: 'AppName') -> Response
     ```
 
-- `Search(string) -> ListResponse(success: boolean, message: string, keys: repeated string)`
+- `Read(key: string, namespace: string) -> ReadResponse(success: boolean, message: string, value: string)`
 
-  - Consumer wants to see all keys that contain string, e.g. 'Radio'
+  - Consumer wants to read *value* of existing *key* in a given *namespace* (default is ""), e.g.
+    'Vehicle.Infotainment.Radio.CurrentStation':
+
+    ```text
+    Read('Vehicle.Infotainment.Radio.CurrentStation') -> 'wdr 4'
+
+    Read('Vehicle.doesNotExist') -> ERROR
+
+    Read(key: 'Private.Info', namespace: 'AppName') -> 'test'
+    ```
+
+- `Delete(key: string, namespace: string) -> StandardResponse(success: boolean, message: string)`
+
+  - Consumer wants to delete an existing *key* + *value* from a given *namespace* (default is ""), e.g.
+    'Vehicle.Infotainment.Radio.CurrentStation':
+
+    ```text
+    Delete('Vehicle.Infotainment.Radio.CurrentStation') -> Response
+
+    Delete('Vehicle.doesNotExist') -> ERROR
+
+    Delete(key: 'Private.Info', namespace: 'AppName') -> Response
+    ```
+
+- `Search(key: string, namespace: string) -> ListResponse(success: boolean, message: string, keys: repeated string)`
+
+  - Consumer wants to list all keys that contain *key* in a given *namespace* (default is ""), e.g. 'Radio'
 
     ```text
     Search('Radio') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
 
-    Search('Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
+    Search('Info') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
 
     Search('nt.Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation')
 
     Search('') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
+
+    Search(key: '', namespace: 'AppName') -> ('Private.Info')
     ```
 
-- `list_nodes_starting_in(node: string, level: optional int) -> ListResponse(boolean, message, repeated string keys)`
+- `DeleteNodes(key: string, namespace: string) -> StandardResponse(success: boolean, message: string)`
 
-  - Consumer wants to see all nodes that start in `$string` exactly `$int`
-    layers deep, e.g. 'Vehicle.Infotainment'
-
-    - `$int=0` lists all keys that start in `$string` any number of layers deep
-    - `$int=` default value is 1
-    - `$string=''` returns root node
+  - Consumer wants to delete all keys located in the subtree with root *key*, within the given *namespace* (default is ""), e.g.
+    'Vehicle.Infotainment'
+  - `key = ''` returns `ERROR`
+  - This rpc assumes that keys follow a VSS-like tree structure.
 
     ```text
-    list_nodes_starting_in('Vehicle.Infotainment', 1) -> ('Vehicle.Infotainment.Radio', 'Vehicle.Infotainment.HVAC')
+    DeleteNodes('Vehicle.Infotainment') -> Response //deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
 
-    list_nodes_starting_in('Vehicle.Infotainment', 2) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
+    DeleteNodes('Vehicle') -> Response //deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
 
-    list_nodes_starting_in('Vehicle', 0) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume', 'Vehicle.Infotainment')
+    DeleteNodes('') -> ERROR
 
-    list_nodes_starting_in('', 0) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume', 'Vehicle.Infotainment', 'test')
+    DeleteNodes('DoesNotExist') -> ERROR
 
-    list_nodes_starting_in('Vehicle.Infotainment') -> ('Vehicle.Infotainment.Radio', 'Vehicle.Infotainment.HVAC')
+    DeleteNodes('Vehic') -> ERROR
 
-    list_nodes_starting_in('', 1) -> ('Vehicle', 'test')
+    DeleteNodes(key: 'Private', namespace: 'AppName') -> Response //deletes ('Private.Info')
+    ```
 
-    list_nodes_starting_in('Vehicle.Infotainment.Radio.Volume', 1) -> ()
+- `ListNodes(node: string, layers: optional int, namespace: string) -> ListResponse(boolean, message, repeated string keys)`
 
-    list_nodes_starting_in('Vehicle', -1) -> ERROR
+  - Consumer wants to list all nodes located in the subtree with root *node* exactly *layers*
+    layers deep, within the given *namespace* (default is "") , e.g. 'Vehicle.Infotainment'
 
-    list_nodes_starting_in('Vehicle.DoesNotExist', 1) -> ERROR
+    - `layers = 0` lists all keys that start in *node* any number of *layers* deep
+    - `layers` default value is 1
+    - `node = ''` returns top-level root node(s)
+    - This rpc assumes that keys follow a VSS-like tree structure.
+
+    ```text
+    ListNodes('Vehicle.Infotainment', 1) -> ('Vehicle.Infotainment.Radio', 'Vehicle.Infotainment.HVAC')
+
+    ListNodes('Vehicle.Infotainment', 2) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
+
+    ListNodes('Vehicle', 0) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume', 'Vehicle.Infotainment')
+
+    ListNodes('', 0) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume', 'Vehicle.Infotainment', 'test')
+
+    ListNodes('Vehicle.Infotainment') -> ('Vehicle.Infotainment.Radio', 'Vehicle.Infotainment.HVAC')
+
+    ListNodes('', 1) -> ('Vehicle', 'test')
+
+    ListNodes('Vehicle.Infotainment.Radio.Volume', 1) -> ()
+
+    ListNodes('Vehicle', -1) -> ERROR
+
+    ListNodes('Vehicle.DoesNotExist', 1) -> ERROR
+
+    ListNodes(key: 'Private', namespace: 'AppName') -> ('Private.Info')
 
     For empty data base:
-    list_nodes_starting_in('', 1) -> ()
-    ```
-
-- `DeleteRecursivelyFrom(node: string) -> StandardResponse`
-
-  - Consumer wants to delete all keys that start in `$string`, e.g.
-    'Vehicle.Infotainment'
-  - `$string = ''` returns `ERROR`
-
-    ```text
-    DeleteRecursivelyFrom('Vehicle.Infotainment') -> // deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
-
-    DeleteRecursivelyFrom('Vehicle') -> // deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
-
-    DeleteRecursivelyFrom('') -> ERROR
+    ListNodes('', 1) -> ()
     ```
 
 ## Example Tree
 
 Note: nodes marked by \* are keys (and therefore have a value)
 
+**Namespace: ""**
 - Vehicle
   - Infotainment \*
     - Radio
@@ -139,6 +171,10 @@ Note: nodes marked by \* are keys (and therefore have a value)
     - Radio
       - Volume \*
 - test \*
+
+**Namespace: "AppName"**
+- Private
+  - Info \*
 
 ## Setup instructions (WIP)
 
@@ -171,16 +207,18 @@ Insomnia usage is describd in
 https://konghq.com/blog/engineering/building-grpc-apis-with-rust
 
 ```text
-OpenDB: {}
-
-Write: { "key": "testkey", "value": "testvalue" }
-
-Read: { "key": "testkey" }
-
-Read: { "key": "wrongkey" }
-
-CloseDB: {}
-
 DestroyDB: {}
+
+Write: { "key": "foo", "value": "foobar", "namespace": "bar" }
+
+Read: { "key": "foo", "namespace": "bar" }
+
+Delete: { "key": "foo", "namespace": "bar" }
+
+Search: { "key": "foo", "namespace": "bar" }
+
+DeleteNodes: { "key": "foo", "namespace": "bar" }
+
+ListNodes: { "key": "foo", "layers": 1, "namespace": "bar" }
 
 ```
