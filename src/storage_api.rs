@@ -132,7 +132,7 @@ pub mod database_client {
             self.inner = self.inner.accept_compressed(encoding);
             self
         }
-        /// Deletes the data base
+        /// Deletes the entire data base.
         pub async fn destroy_db(
             &mut self,
             request: impl tonic::IntoRequest<super::DestroyArguments>,
@@ -172,7 +172,7 @@ pub mod database_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        /// Reads a value from the data base, if the given key exists, otherwise, the ReadResponse will have "success = false"
+        /// Reads the value for the given key from the data base.
         pub async fn read(
             &mut self,
             request: impl tonic::IntoRequest<super::Key>,
@@ -192,7 +192,7 @@ pub mod database_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        /// Deletes the entry for the given key from the data base
+        /// Deletes the entry for the given key from the data base.
         pub async fn delete(
             &mut self,
             request: impl tonic::IntoRequest<super::Key>,
@@ -212,7 +212,7 @@ pub mod database_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        /// Search existing keys containing given string
+        /// Lists any keys that contain the given string.
         pub async fn search(
             &mut self,
             request: impl tonic::IntoRequest<super::Key>,
@@ -232,8 +232,8 @@ pub mod database_client {
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        /// Delete recursively from existing node
-        pub async fn delete_recursively_from(
+        /// Deletes all keys in subtree of given root.
+        pub async fn delete_nodes(
             &mut self,
             request: impl tonic::IntoRequest<super::Key>,
         ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status> {
@@ -248,12 +248,12 @@ pub mod database_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/storage_api.Database/DeleteRecursivelyFrom",
+                "/storage_api.Database/DeleteNodes",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
-        /// Returns all nodes in subtree with root 'node' and depth of exactly 'layers'
-        pub async fn nodes_starting_in(
+        /// Lists all nodes in subtree of given root and depth.
+        pub async fn list_nodes(
             &mut self,
             request: impl tonic::IntoRequest<super::SubtreeInfo>,
         ) -> Result<tonic::Response<super::ListResponse>, tonic::Status> {
@@ -268,7 +268,7 @@ pub mod database_client {
                 })?;
             let codec = tonic::codec::ProstCodec::default();
             let path = http::uri::PathAndQuery::from_static(
-                "/storage_api.Database/NodesStartingIn",
+                "/storage_api.Database/ListNodes",
             );
             self.inner.unary(request.into_request(), path, codec).await
         }
@@ -281,7 +281,7 @@ pub mod database_server {
     /// Generated trait containing gRPC methods that should be implemented for use with DatabaseServer.
     #[async_trait]
     pub trait Database: Send + Sync + 'static {
-        /// Deletes the data base
+        /// Deletes the entire data base.
         async fn destroy_db(
             &self,
             request: tonic::Request<super::DestroyArguments>,
@@ -291,28 +291,28 @@ pub mod database_server {
             &self,
             request: tonic::Request<super::KeyValue>,
         ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status>;
-        /// Reads a value from the data base, if the given key exists, otherwise, the ReadResponse will have "success = false"
+        /// Reads the value for the given key from the data base.
         async fn read(
             &self,
             request: tonic::Request<super::Key>,
         ) -> Result<tonic::Response<super::ReadResponse>, tonic::Status>;
-        /// Deletes the entry for the given key from the data base
+        /// Deletes the entry for the given key from the data base.
         async fn delete(
             &self,
             request: tonic::Request<super::Key>,
         ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status>;
-        /// Search existing keys containing given string
+        /// Lists any keys that contain the given string.
         async fn search(
             &self,
             request: tonic::Request<super::Key>,
         ) -> Result<tonic::Response<super::ListResponse>, tonic::Status>;
-        /// Delete recursively from existing node
-        async fn delete_recursively_from(
+        /// Deletes all keys in subtree of given root.
+        async fn delete_nodes(
             &self,
             request: tonic::Request<super::Key>,
         ) -> Result<tonic::Response<super::StandardResponse>, tonic::Status>;
-        /// Returns all nodes in subtree with root 'node' and depth of exactly 'layers'
-        async fn nodes_starting_in(
+        /// Lists all nodes in subtree of given root and depth.
+        async fn list_nodes(
             &self,
             request: tonic::Request<super::SubtreeInfo>,
         ) -> Result<tonic::Response<super::ListResponse>, tonic::Status>;
@@ -558,11 +558,11 @@ pub mod database_server {
                     };
                     Box::pin(fut)
                 }
-                "/storage_api.Database/DeleteRecursivelyFrom" => {
+                "/storage_api.Database/DeleteNodes" => {
                     #[allow(non_camel_case_types)]
-                    struct DeleteRecursivelyFromSvc<T: Database>(pub Arc<T>);
+                    struct DeleteNodesSvc<T: Database>(pub Arc<T>);
                     impl<T: Database> tonic::server::UnaryService<super::Key>
-                    for DeleteRecursivelyFromSvc<T> {
+                    for DeleteNodesSvc<T> {
                         type Response = super::StandardResponse;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
@@ -574,7 +574,7 @@ pub mod database_server {
                         ) -> Self::Future {
                             let inner = self.0.clone();
                             let fut = async move {
-                                (*inner).delete_recursively_from(request).await
+                                (*inner).delete_nodes(request).await
                             };
                             Box::pin(fut)
                         }
@@ -584,7 +584,7 @@ pub mod database_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = DeleteRecursivelyFromSvc(inner);
+                        let method = DeleteNodesSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
@@ -596,11 +596,11 @@ pub mod database_server {
                     };
                     Box::pin(fut)
                 }
-                "/storage_api.Database/NodesStartingIn" => {
+                "/storage_api.Database/ListNodes" => {
                     #[allow(non_camel_case_types)]
-                    struct NodesStartingInSvc<T: Database>(pub Arc<T>);
+                    struct ListNodesSvc<T: Database>(pub Arc<T>);
                     impl<T: Database> tonic::server::UnaryService<super::SubtreeInfo>
-                    for NodesStartingInSvc<T> {
+                    for ListNodesSvc<T> {
                         type Response = super::ListResponse;
                         type Future = BoxFuture<
                             tonic::Response<Self::Response>,
@@ -611,9 +611,7 @@ pub mod database_server {
                             request: tonic::Request<super::SubtreeInfo>,
                         ) -> Self::Future {
                             let inner = self.0.clone();
-                            let fut = async move {
-                                (*inner).nodes_starting_in(request).await
-                            };
+                            let fut = async move { (*inner).list_nodes(request).await };
                             Box::pin(fut)
                         }
                     }
@@ -622,7 +620,7 @@ pub mod database_server {
                     let inner = self.inner.clone();
                     let fut = async move {
                         let inner = inner.0;
-                        let method = NodesStartingInSvc(inner);
+                        let method = ListNodesSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
                         let mut grpc = tonic::server::Grpc::new(codec)
                             .apply_compression_config(
