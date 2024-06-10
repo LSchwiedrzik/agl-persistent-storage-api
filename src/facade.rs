@@ -1,4 +1,4 @@
-use rocksdb::{Options, DB};
+use rust_rocksdb::{Options, DB};
 
 // static mut DB_INSTANCE: Option<DB> = None;
 

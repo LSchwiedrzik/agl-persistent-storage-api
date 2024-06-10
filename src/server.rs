@@ -97,7 +97,7 @@ impl Database for DatabaseManager {
         }))
     }
 
-    async fn delete_recursively_from(
+    async fn delete_nodes(
         &self,
         request: Request<Key>,
     ) -> Result<Response<StandardResponse>, Status> {
@@ -114,7 +114,7 @@ impl Database for DatabaseManager {
         }))
     }
 
-    async fn nodes_starting_in(
+    async fn list_nodes(
         &self,
         request: Request<SubtreeInfo>,
     ) -> Result<Response<ListResponse>, Status> {
@@ -956,7 +956,7 @@ mod tests {
         let deletion_node = "Vehicle.Infotainment";
         let deletion_namespace = "";
         let delete_recursively_response = client
-            .delete_recursively_from(Key {
+            .delete_nodes(Key {
                 key: deletion_node.to_string(),
                 namespace: deletion_namespace.to_string(),
             })
@@ -1109,7 +1109,7 @@ mod tests {
         let deletion_node = "Vehicle";
         let deletion_namespace = "";
         let delete_recursively_response = client
-            .delete_recursively_from(Key {
+            .delete_nodes(Key {
                 key: deletion_node.to_string(),
                 namespace: deletion_namespace.to_string(),
             })
@@ -1280,7 +1280,7 @@ mod tests {
         let deletion_node = "Vehic";
         let deletion_namespace = "";
         let delete_recursively_response = client
-            .delete_recursively_from(Key {
+            .delete_nodes(Key {
                 key: deletion_node.to_string(),
                 namespace: deletion_namespace.to_string(),
             })
@@ -1416,7 +1416,7 @@ mod tests {
         let deletion_node = "";
         let deletion_namespace = "";
         let delete_recursively_response = client
-            .delete_recursively_from(Key {
+            .delete_nodes(Key {
                 key: deletion_node.to_string(),
                 namespace: deletion_namespace.to_string(),
             })
@@ -1546,7 +1546,7 @@ mod tests {
         let layers = 1;
         let namespace = "";
         let response = client
-            .nodes_starting_in(SubtreeInfo {
+            .list_nodes(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
                 namespace: namespace.to_string(),
@@ -1594,7 +1594,7 @@ mod tests {
         let node = "Vehicle.Infotainment";
         let namespace = "";
         let response = client
-            .nodes_starting_in(SubtreeInfo {
+            .list_nodes(SubtreeInfo {
                 node: node.to_string(),
                 layers: None,
                 namespace: namespace.to_string(),
@@ -1643,7 +1643,7 @@ mod tests {
         let layers = 2;
         let namespace = "";
         let response = client
-            .nodes_starting_in(SubtreeInfo {
+            .list_nodes(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
                 namespace: namespace.to_string(),
@@ -1696,7 +1696,7 @@ mod tests {
         let layers = 0;
         let namespace = "";
         let response = client
-            .nodes_starting_in(SubtreeInfo {
+            .list_nodes(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
                 namespace: namespace.to_string(),
@@ -1751,7 +1751,7 @@ mod tests {
         let layers = 0;
         let namespace = "";
         let response = client
-            .nodes_starting_in(SubtreeInfo {
+            .list_nodes(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
                 namespace: namespace.to_string(),
@@ -1807,7 +1807,7 @@ mod tests {
         let layers = 1;
         let namespace = "";
         let response = client
-            .nodes_starting_in(SubtreeInfo {
+            .list_nodes(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
                 namespace: namespace.to_string(),
@@ -1853,7 +1853,7 @@ mod tests {
         let layers = 1;
         let namespace = "";
         let response = client
-            .nodes_starting_in(SubtreeInfo {
+            .list_nodes(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
                 namespace: namespace.to_string(),
@@ -1899,7 +1899,7 @@ mod tests {
         let layers = -1;
         let namespace = "";
         let response = client
-            .nodes_starting_in(SubtreeInfo {
+            .list_nodes(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
                 namespace: namespace.to_string(),
@@ -1944,7 +1944,7 @@ mod tests {
         let layers = 1;
         let namespace = "";
         let response = client
-            .nodes_starting_in(SubtreeInfo {
+            .list_nodes(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
                 namespace: namespace.to_string(),
@@ -1987,7 +1987,7 @@ mod tests {
         let layers = 1;
         let namespace = "";
         let response = client
-            .nodes_starting_in(SubtreeInfo {
+            .list_nodes(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
                 namespace: namespace.to_string(),
@@ -2031,7 +2031,7 @@ mod tests {
         let layers = 1;
         let namespace = "AppName";
         let response = client
-            .nodes_starting_in(SubtreeInfo {
+            .list_nodes(SubtreeInfo {
                 node: node.to_string(),
                 layers: Some(layers),
                 namespace: namespace.to_string(),

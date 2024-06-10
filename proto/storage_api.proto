@@ -3,26 +3,26 @@ syntax = "proto3";
 package storage_api;
 
 service Database {
-    // Deletes the data base
+    // Deletes the entire data base.
     rpc DestroyDB(DestroyArguments) returns (StandardResponse);
 
     // Writes a key-value pair to the data base
     rpc Write(KeyValue) returns (StandardResponse);
 
-    // Reads a value from the data base, if the given key exists, otherwise, the ReadResponse will have "success = false"
+    // Reads the value for the given key from the data base.
     rpc Read(Key) returns (ReadResponse);
 
-    // Deletes the entry for the given key from the data base
+    // Deletes the entry for the given key from the data base.
     rpc Delete(Key) returns (StandardResponse);
 
-    // Search existing keys containing given string
+    // Lists any keys that contain the given string.
     rpc Search(Key) returns (ListResponse);
 
-    // Delete recursively from existing node
-    rpc DeleteRecursivelyFrom(Key) returns (StandardResponse);
+    // Deletes all keys in subtree of given root. Assumes that keys follow VSS-like tress structure.
+    rpc DeleteNodes(Key) returns (StandardResponse);
 
-    // Returns all nodes in subtree with root 'node' and depth of exactly 'layers'
-    rpc NodesStartingIn(SubtreeInfo) returns (ListResponse);
+    // Lists all nodes in subtree of given root and depth. Assumes that keys follow VSS-like tress structure.
+    rpc ListNodes(SubtreeInfo) returns (ListResponse);
 }
 
 message Key {
