@@ -1,6 +1,7 @@
 use crate::facade::RocksDbFacade;
-
-const DB_PATH: &str = "rocksdb";
+use home::home_dir;
+use std::path::Path;
+use std::path::PathBuf;
 
 #[derive(Debug)]
 pub struct DbService {
@@ -14,19 +15,43 @@ impl DbService {
         }
     }
 
+    fn set_path_db(&mut self) -> String {
+        if home_dir()
+            .expect("Unable to get your home dir!")
+            .try_exists()
+            .expect("Can't check existence of directory")
+        {
+            let mut db_path = home_dir().expect("Unable to get your home dir!");
+            db_path.push("AGLPersistentStorageAPI");
+            return db_path.into_os_string().into_string().unwrap();
+        } else if Path::new("/etc/")
+            .try_exists()
+            .expect("Can't check existence of directory")
+        {
+            let mut db_path = PathBuf::new();
+            db_path.push("/etc/default/AGLPersistentStorageAPI");
+            return db_path.into_os_string().into_string().unwrap();
+        } else {
+            let mut db_path = PathBuf::new();
+            db_path.push("AGLPersistentStorageAPI");
+            return db_path.into_os_string().into_string().unwrap();
+        }
+    }
+
     fn open_db(&mut self) -> (bool, String) {
-        match self.rocks_db_facade.open_db(DB_PATH) {
+        let db_path = self.set_path_db();
+        match self.rocks_db_facade.open_db(db_path.as_str()) {
             Ok(()) => {
                 return (
                     true,
-                    String::from("Opened database at path '") + DB_PATH + "'",
+                    String::from("Opened database at path '") + db_path.as_str() + "'",
                 )
             }
             Err(e) => {
                 return (
                     false,
                     String::from("Error when trying to open database at path '")
-                        + &DB_PATH
+                        + &db_path.as_str()
                         + "': "
                         + &e.to_string(),
                 )
@@ -34,32 +59,24 @@ impl DbService {
         }
     }
 
-    /*
-    fn close_db() -> (bool, String) {
-        match facade::close_db() {
-            Ok(()) => return (true, String::from("Closed database")),
-            Err(e) => return (false, String::from("Error when trying to close database: ") + &e.to_string()),
-        }
-    }
-    */
-
     pub fn destroy_db(&mut self) -> (bool, String) {
         let (is_open, msg) = self.open_db();
+        let db_path = self.set_path_db();
         if !is_open {
             return (false, msg);
         }
-        match self.rocks_db_facade.destroy_db(DB_PATH) {
+        match self.rocks_db_facade.destroy_db(db_path.as_str()) {
             Ok(()) => {
                 return (
                     true,
-                    String::from("Destroyed database at path '") + DB_PATH + "'",
+                    String::from("Destroyed database at path '") + db_path.as_str() + "'",
                 )
             }
             Err(e) => {
                 return (
                     false,
                     String::from("Error when trying to destroy database at path '")
-                        + DB_PATH
+                        + db_path.as_str()
                         + "': "
                         + &e.to_string(),
                 )

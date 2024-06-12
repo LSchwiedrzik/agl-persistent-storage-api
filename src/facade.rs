@@ -1,13 +1,5 @@
 use rust_rocksdb::{Options, DB};
 
-// static mut DB_INSTANCE: Option<DB> = None;
-
-/*pub fn setup_db(path:&str) -> bool {
-    println!("Set up database");
-    unsafe { DB_INSTANCE = Some(DB::open_default(path).unwrap()) };
-    true
-}*/
-
 #[derive(Debug)]
 pub struct RocksDbFacade {
     db_instance: Option<DB>,

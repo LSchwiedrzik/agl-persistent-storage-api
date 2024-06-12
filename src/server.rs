@@ -138,7 +138,6 @@ mod tests {
     use super::*;
     use crate::storage_api::database_client::DatabaseClient;
     use crate::storage_api::database_server::DatabaseServer;
-    //use rocksdb::statistics::NameParseError;
     use serial_test::serial;
     use std::net::SocketAddr;
     use tonic::transport::{Channel, Server};

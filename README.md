@@ -176,13 +176,15 @@ Note: nodes marked by \* are keys (and therefore have a value)
 - Private
   - Info \*
 
-## Setup instructions (WIP)
+## Setup instructions
 
 1. Install rust
+
 2. Download or install protobuf (e.g. from
    [here](https://github.com/protocolbuffers/protobuf/releases)) and set the
    `PROTOC` environment variable:
    `echo -n "export PROTOC=/path/to/protoc.exe" >> ~/.bashrc`
+   
 3. Build application
 
    ```bash

@@ -25,6 +25,7 @@ dependencies = [
  "clap",
  "futures",
  "futures-util",
+ "home",
  "prost",
  "rust-rocksdb",
  "serial_test",
