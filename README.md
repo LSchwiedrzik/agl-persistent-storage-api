@@ -1,8 +1,9 @@
 # Persistent Storage API for the Automotive Grade Linux demo
 
-Our goal is to develop a grpc API for [AGL](https://www.automotivelinux.org/) 
-that serves as persistent storage API for the demo. The API will be written 
-in Rust and make use of [tonic](https://crates.io/crates/tonic-build) for grpc
+The AGL Persistent Storage API 
+is a grpc API for [AGL](https://www.automotivelinux.org/) 
+that serves as persistent storage API for the demo. The API is written 
+in Rust and makes use of [tonic](https://crates.io/crates/tonic-build) for grpc
 functionality as well as [RocksDB](https://rocksdb.org/) as a database backend,
 using [rust-rocksdb](https://crates.io/crates/rust-rocksdb). Use cases include
 retaining settings over a system shutdown (e.g. audio, HVAC, profile data, Wifi
@@ -12,13 +13,11 @@ The most important hardware consideration for this project is that the AGL demo
 runs on embedded hardware with flash storage, so we want to minimize number of
 write operations. This impacts the choice of database; we have chosen to work
 with RocksDB as it is well-suited for embedded computing and tunable with
-respect to write amplification. Ideally we want the API to be flexible with
-respect to database used (pluggable backends), but this is not a priority at
-this early development stage. Our eventual goal is to integrate this project
-into the then-current AGL demo version (quillback for now, later master).
+respect to write amplification. In principle the API is flexible with
+respect to database used (pluggable backends), but only RocksDB is implemented. 
+This API is part of the AGL demo as of release 'Royal Ricefish'.
 
-We are aiming to construct the Persistent Storage API using a layered
-architecture:
+The AGL Persistent Storage API is constructed using a layered architecture:
 
 - Controller layer: translates proto calls to service calls.
 - Service layer: communicates with the controller and facade layers, implements
@@ -27,8 +26,11 @@ architecture:
 
 ## API Specification
 
-**Namespaces**
+### Namespaces
+
 The rpcs described below interact with keys belonging to specific namespaces. This feature enables applications to maintain private namespaces within the same database. Not specifying a namespace when calling the API will result in the default namespace "" being used. Alternatively, a specific namespace (e.g. "AppName") can be chosen. With the exception of DestroyDB, which acts on the entire database, all rpcs can only interact with one namespace at a time.
+
+### Remote procedure calls
 
 - `DestroyDB() -> StandardResponse(success: boolean, message: string)`
 
@@ -178,35 +180,33 @@ Note: nodes marked by \* are keys (and therefore have a value)
 
 ## Setup instructions
 
-1. Install rust
+1. Install [rust](https://rustup.rs/).
 
-2. Download or install protobuf (e.g. from
-   [here](https://github.com/protocolbuffers/protobuf/releases)) and set the
-   `PROTOC` environment variable:
-   `echo -n "export PROTOC=/path/to/protoc.exe" >> ~/.bashrc`
+2. Install the Protobuf Compiler, e.g. by downloading the latest pre-built binary for your system [here](https://github.com/protocolbuffers/protobuf/releases) and following the installation instructions included in the readme. Be sure to add your Protobuf installation to your PATH. See also the general [Protobuf installation instructions](https://github.com/protocolbuffers/protobuf?tab=readme-ov-file#protobuf-compiler-installation).
+
+3. Install a clang compiler, e.g. by downloading the latest pre-built LLVM binary for your system [here](https://github.com/llvm/llvm-project/releases) and adding the LIBCLANG_PATH variable to your environment.
    
-3. Build application
+4. Build application.
 
    ```bash
    cargo build
    ```
 
-4. Run tests
+5. Run tests.
 
    ```bash
    cargo test
    ```
 
-5. Start server
+6. Start server.
 
    ```bash
    cargo run --release --bin server
    ```
 
-## Insomnia
+## Remote Procedure Call Usage
 
-Insomnia usage is describd in
-https://konghq.com/blog/engineering/building-grpc-apis-with-rust
+To ensure your API is working as expected, you can use [Insomnia](https://insomnia.rest/) to manually send remote procedure calls to the API, following the instructions provided in the [Insomnia documentation](https://docs.insomnia.rest/insomnia/requests#send-a-grpc-request). For each procedure call, an example is given below:
 
 ```text
 DestroyDB: {}
