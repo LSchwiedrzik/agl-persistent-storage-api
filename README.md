@@ -106,7 +106,7 @@ The rpcs described below interact with keys belonging to specific namespaces. Th
   - Consumer wants to delete all keys located in the subtree with root *key*, within the given *namespace* (default is ""), e.g.
     'Vehicle.Infotainment'
   - `key = ''` returns `ERROR`
-  - This rpc assumes that keys follow a VSS-like tree structure.
+  - This rpc assumes that keys follow a VSS-like tree structure. *key* must be the full name of an existing node.
 
     ```text
     DeleteNodes('Vehicle.Infotainment') -> Response //deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
@@ -127,10 +127,10 @@ The rpcs described below interact with keys belonging to specific namespaces. Th
   - Consumer wants to list all nodes located in the subtree with root *node* exactly *layers*
     layers deep, within the given *namespace* (default is "") , e.g. 'Vehicle.Infotainment'
 
-    - `layers = 0` lists all keys that start in *node* any number of *layers* deep
-    - `layers` default value is 1
-    - `node = ''` returns top-level root node(s)
-    - This rpc assumes that keys follow a VSS-like tree structure.
+  - `layers = 0` lists all keys that start in *node* any number of *layers* deep
+  - `layers` default value is 1
+  - `node = ''` returns top-level root node(s)
+  - This rpc assumes that keys follow a VSS-like tree structure. *node* must be the full name of an existing node.
 
     ```text
     ListNodes('Vehicle.Infotainment', 1) -> ('Vehicle.Infotainment.Radio', 'Vehicle.Infotainment.HVAC')
@@ -221,6 +221,5 @@ Search: { "key": "foo", "namespace": "bar" }
 
 DeleteNodes: { "key": "foo", "namespace": "bar" }
 
-ListNodes: { "key": "foo", "layers": 1, "namespace": "bar" }
-
+ListNodes: { "node": "foo", "layers": 1, "namespace": "bar" }
 ```
