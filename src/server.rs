@@ -148,7 +148,7 @@ mod tests {
     #[serial]
     async fn test_write_key_value() {
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -156,7 +156,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -194,7 +194,7 @@ mod tests {
     #[serial]
     async fn test_write_empty_key() {
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -202,7 +202,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -243,7 +243,7 @@ mod tests {
         // Tests if it is possible to write to a "node" of a before hand written key, regarding VSS
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -251,7 +251,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -314,7 +314,7 @@ mod tests {
         // Tests if it is possible to write to a "node" of a before hand written key, regarding VSS
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -322,7 +322,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -383,7 +383,7 @@ mod tests {
     #[serial]
     async fn test_write_to_nondefault_namespace() {
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -391,7 +391,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -431,7 +431,7 @@ mod tests {
     #[serial]
     async fn test_delete() {
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -439,7 +439,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -488,7 +488,7 @@ mod tests {
     #[serial]
     async fn test_delete_key_does_not_exist() {
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -496,7 +496,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -534,7 +534,7 @@ mod tests {
     #[serial]
     async fn test_delete_from_nondefault_namespace() {
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -542,7 +542,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -643,7 +643,7 @@ mod tests {
         // list_keys_containing('Radio') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -651,7 +651,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -689,7 +689,7 @@ mod tests {
         // list_keys_containing('Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -697,7 +697,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -735,7 +735,7 @@ mod tests {
         // list_keys_containing('nt.Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -743,7 +743,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -781,7 +781,7 @@ mod tests {
         // list_keys_containing('') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -789,7 +789,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -830,7 +830,7 @@ mod tests {
         // list_keys_containing('Rad') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -838,7 +838,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -876,7 +876,7 @@ mod tests {
         // -> deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -884,7 +884,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1020,7 +1020,7 @@ mod tests {
         // deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1028,7 +1028,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1180,7 +1180,7 @@ mod tests {
         // delete_recursively_from('Vehic') -> deletes ('Vehic')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1188,7 +1188,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1360,7 +1360,7 @@ mod tests {
         // deletes ('Vehicle.Infotainment', 'Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1368,7 +1368,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1523,7 +1523,7 @@ mod tests {
         // list_nodes_starting_in('Vehicle.Infotainment', 1) -> ('Vehicle.Infotainment.Radio', 'Vehicle.Infotainment.HVAC')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1531,7 +1531,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1572,7 +1572,7 @@ mod tests {
         // list_nodes_starting_in('Vehicle.Infotainment') -> ('Vehicle.Infotainment.Radio', 'Vehicle.Infotainment.HVAC')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1580,7 +1580,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1620,7 +1620,7 @@ mod tests {
         // list_nodes_starting_in('Vehicle.Infotainment', 2) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1628,7 +1628,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1673,7 +1673,7 @@ mod tests {
         // list_nodes_starting_in('Vehicle', 0) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume', 'Vehicle.Infotainment')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1681,7 +1681,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1728,7 +1728,7 @@ mod tests {
         // list_nodes_starting_in('', 0) -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Infotainment.Radio.Volume', 'Vehicle.Infotainment.HVAC.OutdoorTemperature', 'Vehicle.Communication.Radio.Volume', 'Vehicle.Infotainment', 'test')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1736,7 +1736,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1784,7 +1784,7 @@ mod tests {
         // list_nodes_starting_in('', 1) -> ('Vehicle', 'test')
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1792,7 +1792,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1830,7 +1830,7 @@ mod tests {
         // list_nodes_starting_in('Vehicle.Infotainment.Radio.Volume', 1) -> ()
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1838,7 +1838,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1876,7 +1876,7 @@ mod tests {
         // list_nodes_starting_in('Vehicle', -1) -> ERROR
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1884,7 +1884,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1921,7 +1921,7 @@ mod tests {
         // list_nodes_starting_in('Vehicle.DoesNotExist', 1) -> ERROR
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1929,7 +1929,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -1966,7 +1966,7 @@ mod tests {
         // For empty data base: list_nodes_starting_in('', 1) -> ()
 
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -1974,7 +1974,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
@@ -2008,7 +2008,7 @@ mod tests {
     #[serial]
     async fn test_list_nodes_nondefault_namespace() {
         // Arrange
-        let address: SocketAddr = "127.0.0.1:9001".parse().unwrap();
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
         let database_manager = DatabaseManager::new();
         let server = Server::builder().add_service(DatabaseServer::new(database_manager));
         let server_task = tokio::spawn(server.serve(address.clone()));
@@ -2016,7 +2016,7 @@ mod tests {
         // Wait for the server to be ready.
         tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
 
-        let end_addr = "http://127.0.0.1:9001";
+        let end_addr = "http://127.0.0.1:50054";
         let endpoint = tonic::transport::Endpoint::from_static(end_addr);
         let mut client = DatabaseClient::connect(endpoint).await.unwrap();
 
