@@ -24,6 +24,10 @@ The AGL Persistent Storage API is constructed using a layered architecture:
   the business logic
 - Facade layer: implements RocksDB.
 
+By default, the API can be accessed through port 50054. This can be changed in main.rs.
+The RocksDB database files are stored in directory "AGLPersistentStorageAPI", 
+located in the home directory of your system. This can be changed in service.rs.
+
 ## API Specification
 
 ### Namespaces

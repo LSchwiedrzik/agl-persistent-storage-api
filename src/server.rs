@@ -142,6 +142,57 @@ mod tests {
     use std::net::SocketAddr;
     use tonic::transport::{Channel, Server};
 
+    // TESTS FOR DESTROY FUNCTION
+
+    #[tokio::test]
+    #[serial]
+    async fn test_destroy() {
+        // Arrange
+        let address: SocketAddr = "127.0.0.1:50054".parse().unwrap();
+        let database_manager = DatabaseManager::new();
+        let server = Server::builder().add_service(DatabaseServer::new(database_manager));
+        let server_task = tokio::spawn(server.serve(address.clone()));
+
+        // Wait for the server to be ready.
+        tokio::time::sleep(tokio::time::Duration::from_secs(2)).await;
+
+        let end_addr = "http://127.0.0.1:50054";
+        let endpoint = tonic::transport::Endpoint::from_static(end_addr);
+        let mut client = DatabaseClient::connect(endpoint).await.unwrap();
+
+        // Initial clean up.
+        client.destroy_db(DestroyArguments {}).await.unwrap();
+
+        let key = "Vehicle.Infotainment.Radio.CurrentStation";
+        let value = "1live";
+        let namespace = "";
+        let key_value = KeyValue {
+            key: key.to_string(),
+            value: value.to_string(),
+            namespace: namespace.to_string(),
+        };
+
+        // Act
+        let response_write = client.write(key_value).await.unwrap();
+        let response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
+        let response_read = client
+            .read(Key {
+                key: key.to_string(),
+                namespace: namespace.to_string(),
+            })
+            .await
+            .unwrap();
+
+        // Assert
+        assert!(response_write.into_inner().success);
+        assert!(response_destroy.into_inner().success);
+        assert!(!response_read.into_inner().success);
+
+        // Clean up.
+        let _response_destroy = client.destroy_db(DestroyArguments {}).await.unwrap();
+        server_task.abort();
+    }
+
     // TESTS FOR WRITE FUNCTION
 
     #[tokio::test]
