@@ -17,7 +17,8 @@ mod storage_api_proto {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "127.0.0.1:50054".parse()?; 
+    // API port is defined here
+    let addr = "127.0.0.1:50054".parse()?;
     let dbmanager = DatabaseManager::new();
 
     let reflection_service = tonic_reflection::server::Builder::configure()

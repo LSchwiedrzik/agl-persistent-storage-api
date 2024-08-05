@@ -16,6 +16,7 @@ impl DbService {
     }
 
     fn set_path_db(&mut self) -> String {
+        // Database path is defined here
         if home_dir()
             .expect("Unable to get your home dir!")
             .try_exists()
