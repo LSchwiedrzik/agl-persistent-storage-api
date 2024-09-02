@@ -1,5 +1,17 @@
 # Persistent Storage API for the Automotive Grade Linux demo
 
+A grpc API that provides persistent storage for the Automotive Grade Linux demo, developed by d-fine. 
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [API Specification](#api-specification)
+3. [Example Tree](#example-tree)
+4. [Setup Instructions](#setup-instructions)
+5. [Remote Procedure Call Usage](#remote-procedure-call-usage)
+
+## Overview
+
 The AGL Persistent Storage API 
 is a grpc API for [AGL](https://www.automotivelinux.org/) 
 that serves as persistent storage API for the demo. The API is written 
@@ -24,15 +36,24 @@ The AGL Persistent Storage API is constructed using a layered architecture:
   the business logic
 - Facade layer: implements RocksDB.
 
-By default, the API can be accessed through port 50054. This can be changed in main.rs.
-The RocksDB database files are stored in directory "AGLPersistentStorageAPI", 
-located in the home directory of your system. This can be changed in service.rs.
+By default, the API can be accessed through **port 50054**. This can be changed in 
+main.rs. The RocksDB database files are stored in directory 
+**AGLPersistentStorageAPI**, located in the home directory of your system. 
+This can be changed in service.rs.
+
+If you would like to contribute to the further development of the AGL 
+Persistent Storage API, please check out our [Contributing Guide](./CONTRIBUTING.md)
 
 ## API Specification
 
 ### Namespaces
 
-The rpcs described below interact with keys belonging to specific namespaces. This feature enables applications to maintain private namespaces within the same database. Not specifying a namespace when calling the API will result in the default namespace "" being used. Alternatively, a specific namespace (e.g. "AppName") can be chosen. With the exception of DestroyDB, which acts on the entire database, all rpcs can only interact with one namespace at a time.
+The rpcs described below interact with keys belonging to specific namespaces. 
+This feature enables applications to maintain private namespaces within the 
+same database. Not specifying a namespace when calling the API will result in 
+the default namespace "" being used. Alternatively, a specific namespace (e.g. 
+"AppName") can be chosen. With the exception of DestroyDB, which acts on the 
+entire database, all rpcs can only interact with one namespace at a time.
 
 ### Remote procedure calls
 
@@ -46,8 +67,8 @@ The rpcs described below interact with keys belonging to specific namespaces. Th
 
 - `Write(key: string, value: string, namespace: string) -> StandardResponse(success: boolean, message: string)`
 
-  - Consumer wants to save *key* + *value* to a given *namespace* (default is ""), (e.g.
-    'Vehicle.Infotainment.Radio.CurrentStation':'hr5').
+  - Consumer wants to save *key* + *value* to a given *namespace* (default is ""), 
+    (e.g. 'Vehicle.Infotainment.Radio.CurrentStation':'hr5').
   - This overwrites existing *value* under *key*.
   - An empty string cannot be used as a *key*.
 
@@ -65,8 +86,8 @@ The rpcs described below interact with keys belonging to specific namespaces. Th
 
 - `Read(key: string, namespace: string) -> ReadResponse(success: boolean, message: string, value: string)`
 
-  - Consumer wants to read *value* of existing *key* in a given *namespace* (default is ""), e.g.
-    'Vehicle.Infotainment.Radio.CurrentStation':
+  - Consumer wants to read *value* of existing *key* in a given *namespace* (default is ""), 
+    e.g. 'Vehicle.Infotainment.Radio.CurrentStation':
 
     ```text
     Read('Vehicle.Infotainment.Radio.CurrentStation') -> 'wdr 4'
@@ -78,8 +99,8 @@ The rpcs described below interact with keys belonging to specific namespaces. Th
 
 - `Delete(key: string, namespace: string) -> StandardResponse(success: boolean, message: string)`
 
-  - Consumer wants to delete an existing *key* + *value* from a given *namespace* (default is ""), e.g.
-    'Vehicle.Infotainment.Radio.CurrentStation':
+  - Consumer wants to delete an existing *key* + *value* from a given *namespace* (default is ""), 
+    e.g. 'Vehicle.Infotainment.Radio.CurrentStation':
 
     ```text
     Delete('Vehicle.Infotainment.Radio.CurrentStation') -> Response
@@ -91,7 +112,8 @@ The rpcs described below interact with keys belonging to specific namespaces. Th
 
 - `Search(key: string, namespace: string) -> ListResponse(success: boolean, message: string, keys: repeated string)`
 
-  - Consumer wants to list all keys that contain *key* in a given *namespace* (default is ""), e.g. 'Radio'
+  - Consumer wants to list all keys that contain *key* in a given *namespace* (default is ""), 
+    e.g. 'Radio'
 
     ```text
     Search('Radio') -> ('Vehicle.Infotainment.Radio.CurrentStation', 'Vehicle.Communication.Radio.Volume')
@@ -107,8 +129,8 @@ The rpcs described below interact with keys belonging to specific namespaces. Th
 
 - `DeleteNodes(key: string, namespace: string) -> StandardResponse(success: boolean, message: string)`
 
-  - Consumer wants to delete all keys located in the subtree with root *key*, within the given *namespace* (default is ""), e.g.
-    'Vehicle.Infotainment'
+  - Consumer wants to delete all keys located in the subtree with root *key*, within the given *namespace* (default is ""), 
+    e.g. 'Vehicle.Infotainment'
   - `key = ''` returns `ERROR`
   - This rpc assumes that keys follow a VSS-like tree structure. *key* must be the full name of an existing node.
 
@@ -182,13 +204,19 @@ Note: nodes marked by \* are keys (and therefore have a value)
 - Private
   - Info \*
 
-## Setup instructions
+## Setup Instructions
 
 1. Install [rust](https://rustup.rs/).
 
-2. Install the Protobuf Compiler, e.g. by downloading the latest pre-built binary for your system [here](https://github.com/protocolbuffers/protobuf/releases) and following the installation instructions included in the readme. Be sure to add your Protobuf installation to your PATH. See also the general [Protobuf installation instructions](https://github.com/protocolbuffers/protobuf?tab=readme-ov-file#protobuf-compiler-installation).
+2. Install the Protobuf Compiler, e.g. by downloading the latest pre-built 
+binary for your system [here](https://github.com/protocolbuffers/protobuf/releases) 
+and following the installation instructions included in the readme. Be sure to 
+add your Protobuf installation to your PATH. See also the general 
+[Protobuf installation instructions](https://github.com/protocolbuffers/protobuf?tab=readme-ov-file#protobuf-compiler-installation).
 
-3. Install a clang compiler, e.g. by downloading the latest pre-built LLVM binary for your system [here](https://github.com/llvm/llvm-project/releases) and adding the LIBCLANG_PATH variable to your environment.
+3. Install a clang compiler, e.g. by downloading the latest pre-built LLVM 
+binary for your system [here](https://github.com/llvm/llvm-project/releases) 
+and adding the LIBCLANG_PATH variable to your environment.
    
 4. Build application.
 
@@ -210,20 +238,43 @@ Note: nodes marked by \* are keys (and therefore have a value)
 
 ## Remote Procedure Call Usage
 
-To ensure your API is working as expected, you can use [Insomnia](https://insomnia.rest/) to manually send remote procedure calls to the API, following the instructions provided in the [Insomnia documentation](https://docs.insomnia.rest/insomnia/requests#send-a-grpc-request). For each procedure call, an example is given below:
+To ensure your API is working as expected, start the API server and attempt to send
+a remote procedure call, e.g. using [grpcurl](https://github.com/fullstorydev/grpcurl). 
+Some examples are provided here:
+
+```text
+DestroyDB: docker run --net=host fullstorydev/grpcurl -plaintext -d '{}' localhost:50054 storage_api.Database/DestroyDB
+
+Write: docker run --net=host fullstorydev/grpcurl -plaintext -d '{"key": "foo", "value": "foobar", "namespace": "bar"}' localhost:50054 storage_api.Database/Write
+
+Read: docker run --net=host fullstorydev/grpcurl -plaintext -d '{"key": "foo", "namespace": "bar"}' localhost:50054 storage_api.Database/Read
+
+Delete: docker run --net=host fullstorydev/grpcurl -plaintext -d '{"key": "foo", "namespace": "bar"}' localhost:50054 storage_api.Database/Delete
+
+Search: docker run --net=host fullstorydev/grpcurl -plaintext -d '{"key": "foo", "namespace": "bar"}' localhost:50054 storage_api.Database/Search
+
+DeleteNodes: docker run --net=host fullstorydev/grpcurl -plaintext -d '{"key": "foo", "namespace": "bar"}' localhost:50054 storage_api.Database/DeleteNodes
+
+ListNodes: docker run --net=host fullstorydev/grpcurl -plaintext -d '{"node": "foo", "layers": 1, "namespace": "bar"}' localhost:50054 storage_api.Database/ListNodes
+```
+
+Alternatively, you can use [Insomnia](https://insomnia.rest/) to manually send 
+remote procedure calls to the API, following the instructions provided in the 
+[Insomnia documentation](https://docs.insomnia.rest/insomnia/requests#send-a-grpc-request). 
+For each procedure call, an example is given below:
 
 ```text
 DestroyDB: {}
 
-Write: { "key": "foo", "value": "foobar", "namespace": "bar" }
+Write: {"key": "foo", "value": "foobar", "namespace": "bar"}
 
-Read: { "key": "foo", "namespace": "bar" }
+Read: {"key": "foo", "namespace": "bar"}
 
-Delete: { "key": "foo", "namespace": "bar" }
+Delete: {"key": "foo", "namespace": "bar"}
 
-Search: { "key": "foo", "namespace": "bar" }
+Search: {"key": "foo", "namespace": "bar"}
 
-DeleteNodes: { "key": "foo", "namespace": "bar" }
+DeleteNodes: {"key": "foo", "namespace": "bar"}
 
-ListNodes: { "node": "foo", "layers": 1, "namespace": "bar" }
+ListNodes: {"node": "foo", "layers": 1, "namespace": "bar"}
 ```
