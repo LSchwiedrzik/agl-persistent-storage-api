@@ -1,6 +1,7 @@
 # Persistent Storage API for the Automotive Grade Linux demo
 
-A grpc API that provides persistent storage for the Automotive Grade Linux demo, developed by d-fine. 
+A grpc API that provides persistent storage for the Automotive Grade Linux demo, 
+developed by [d-fine](https://www.d-fine.com/en/). 
 
 ## Table of Contents
 
@@ -12,7 +13,7 @@ A grpc API that provides persistent storage for the Automotive Grade Linux demo,
 
 ## Overview
 
-The AGL Persistent Storage API 
+The [AGL Persistent Storage API](https://github.com/LSchwiedrzik/agl-persistent-storage-api) 
 is a grpc API for [AGL](https://www.automotivelinux.org/) 
 that serves as persistent storage API for the demo. The API is written 
 in Rust and makes use of [tonic](https://crates.io/crates/tonic-build) for grpc
