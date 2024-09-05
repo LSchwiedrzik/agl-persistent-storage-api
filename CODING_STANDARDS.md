@@ -10,8 +10,7 @@ should adhere to the following coding standards when working on this Rust projec
 3. [Naming Conventions](#naming-conventions)
 4. [Comments and Documentation](#comments-and-documentation)
 5. [Testing](#testing)
-6. [Version Control](#version-control)
-7. [Tools](#tools)
+6. [Tools](#tools)
 
 ## General Principles
 
@@ -113,19 +112,6 @@ mod tests {
         assert_eq!(area, std::f64::consts::PI * 4.0);
     }
 }
-```
-
-## Version Control
-
-- Commit messages should be concise but descriptive, following the format: `Type: Short description`.
-- Group related changes into a single commit.
-- Reference issue numbers in commit messages where relevant.
-- Use branches for all work, and merge to `master` through pull requests.
-
-Example:
-```text
-fix: Corrected off-by-one error in loop
-feat: Added user authentication module
 ```
 
 ## Tools

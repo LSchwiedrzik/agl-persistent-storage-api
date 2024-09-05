@@ -10,6 +10,7 @@ developed by [d-fine](https://www.d-fine.com/en/).
 3. [Example Tree](#example-tree)
 4. [Setup Instructions](#setup-instructions)
 5. [Remote Procedure Call Usage](#remote-procedure-call-usage)
+6. [How to Contribute](#how-to-contribute)
 
 ## Overview
 
@@ -41,9 +42,6 @@ By default, the API can be accessed through **port 50054**. This can be changed 
 main.rs. The RocksDB database files are stored in directory 
 **AGLPersistentStorageAPI**, located in the home directory of your system. 
 This can be changed in service.rs.
-
-If you would like to contribute to the further development of the AGL 
-Persistent Storage API, please check out our [Contributing Guide](./CONTRIBUTING.md)
 
 ## API Specification
 
@@ -279,3 +277,8 @@ DeleteNodes: {"key": "foo", "namespace": "bar"}
 
 ListNodes: {"node": "foo", "layers": 1, "namespace": "bar"}
 ```
+
+## How to Contribute
+
+If you would like to contribute to the further development of the AGL 
+Persistent Storage API, please check out our [Contributing Guide](./CONTRIBUTING.md)

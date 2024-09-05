@@ -24,7 +24,7 @@ which outlines the standards of behavior expected from all contributors.
 
 ## Development Workflow
 
-1. Fork the repository and create your branch from `main`.
+1. Fork the repository and create your branch from `master`.
 2. Follow the [coding standards](./CODING_STANDARDS.md) of the project.
 3. Ensure your code is well-documented and includes tests where applicable.
 
@@ -38,7 +38,7 @@ which outlines the standards of behavior expected from all contributors.
 
 1. Commit your changes with clear and descriptive messages. [Conventional commits](https://www.conventionalcommits.org/en/v1.0.0/) are preferred.
 2. Push your branch to your forked repository.
-3. Submit a pull request (PR) to the `main` branch, ensuring that all checks pass.
+3. Submit a pull request (PR) to the `master` branch, ensuring that all checks pass.
 4. Reference any related issues in your PR description.
 
 ## Issue Management
@@ -51,11 +51,11 @@ which outlines the standards of behavior expected from all contributors.
 
 1. Your pull request will be reviewed by a maintainer.
 2. Be responsive to feedback and make requested changes.
-3. Once approved, your code will be merged into the main branch.
+3. Once approved, your code will be merged into the `master` branch.
 
 ## Release Process
 
-1. The maintainer will handle releases based on the changes merged into the `main` branch.
+1. The maintainer will handle releases based on the changes merged into the `master` branch.
 2. Follow the project’s versioning guidelines for any new releases.
 
 ## Communication
